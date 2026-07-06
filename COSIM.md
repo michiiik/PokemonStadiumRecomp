@@ -562,3 +562,48 @@ pending, not hidden).
 **How to run (throttled; real cmd.exe):**
 `& "$env:SystemRoot\System32\cmd.exe" /c "…\build_cosim.bat"` then
 `python tools/n64_cosim.py gate1|gate3|ares-gate|oracle|oracle-align …`.
+
+---
+
+## 12. ENVIRONMENT RECONSTRUCTED + ORACLE LIVE — RESUME HERE (2026-07-06)
+
+The 2026-07-04 recovery retired the `N64Recomp-issues` / `rt64-cleanroom`
+junctions §1 assumed, so the whole build arrangement was rebuilt against
+current canonical checkouts and re-validated from scratch. All four gates green
+matching the 2026-07-02 baseline exactly; the T8 frontier is reproduced live.
+
+**Actual topology now (supersedes §1's table):** isolation worktrees, shared
+`main` untouched for the other games.
+
+| Path | Points at | Commit | Why |
+|---|---|---|---|
+| PSR working tree | branch `cosim/tier0` | `ea08f97` | harness/coordinator |
+| `lib/N64ModernRuntime` → worktree `N64ModernRuntime-cosim` | `cosim/tier0` | `41d0f90` | **determinism-critical** — shared main has the virtual-AI-DAC host-clock servo that breaks Gate 1 |
+| `n64recomp` → worktree `N64Recomp-cosim` | detached | `0dc2a0a` | matches the pin; CMake asserts it. Regen `generated/` against THIS (build_cli.bat → `n64recomp/build_cli/N64Recomp.exe game.toml`) |
+| `lib/rt64` → shared `rt64` | `main` | `51b29d2` | b58c2f7 is an ancestor; "no Tier-0 edits"; links + hashes clean, no worktree needed |
+| **oracle server** → worktree `N64Recomp-oracle` | detached | `1d9d6f9` | **★ server needs the T7 cosim commits (1badb33 digests + 1d9d6f9 CPU-state); `0dc2a0a`'s server returns "unknown command" for `cpu`/`rdram_digest`** |
+
+Worktree submodule gitlinks junctioned to shared populated copies
+(`New-Item -Junction`; `[IO.Directory]::Delete(path,$false)` to clear empty
+gitlink dirs first). Details in
+`memory/project_cosim_env_reconstructed_2026_07_05`.
+
+**Ares oracle build (one-time):** MUST use the VS-bundled cmake (PATH cmake is
+devkitPro/MSYS2's, no VS generator). ares.lib (~513 MB, Ares v147 f533120df)
+is vendored + **reusable across N64Recomp commits** — build once in
+`N64Recomp-cosim/ares-bridge/build/ares`, then build `ares_oracle_server` from
+`N64Recomp-oracle` with `-DARES_BUILD_DIR=<that ares.lib dir>`. No PIF firmware
+needed. Coordinator wants POSIX `--ares-exe`/`--ares-cwd` paths (its default
+still points at retired `N64Recomp-issues`, so the override is mandatory).
+
+**Validated (2026-07-06):** gate1 PASS (`cycle_count=55815056` exact) · gate3
+fault@4 · ares-smoke (cpu/rdram_digest/step OK) · ares-gate PASS ·
+**oracle-align --recomp-checkpoint 2 --ares-start 52 --ares-end 60 --range
+display:0x68BB0:0x68D00 --range audio:0x77C90:0x77DC0** → best_ares_frame 60,
+display range matches but audio diverges at `0x77DB0` = `audFrameCt` (recomp 2
+vs Ares 6), sp_task.delivered.audio=1, ZERO pending modeled events. The exact
+documented split.
+
+**NEXT: park-epoch model (in progress).** See §11 for the frontier + fenced-off
+dead ends. Touches N64MR quiescence/checkpoint (load-bearing) — Gate 1 must
+stay byte-identical after every change.
