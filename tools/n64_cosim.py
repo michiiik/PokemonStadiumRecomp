@@ -1554,6 +1554,78 @@ def run_oracle(args: argparse.Namespace) -> int:
         ares.stop()
 
 
+def _parse_hex_bytes(value: Any) -> bytes:
+    """Parse a hex payload from a peek/read_memory reply into raw bytes.
+
+    Recomp `cosim_checkpoint_rdram_peek` returns {"hex": ...}; Ares
+    `read_memory` returns {"bytes": ...}. Both are hex; be liberal about
+    separators/prefixes.
+    """
+    if not isinstance(value, str):
+        return b""
+    s = value.strip()
+    for junk in ("0x", " ", ":", "\n", "\t", "_"):
+        s = s.replace(junk, "")
+    if len(s) % 2:
+        s = s[:-1]
+    try:
+        return bytes.fromhex(s)
+    except ValueError:
+        return b""
+
+
+def read_recomp_range_bytes(recomp: Instance, start: int, count: int) -> bytes:
+    """Read `count` bytes of the HELD checkpoint RDRAM from the recomp side."""
+    out = bytearray()
+    off = 0
+    while off < count:
+        n = min(256, count - off)
+        r = recomp.cmd(
+            {"cmd": "cosim_checkpoint_rdram_peek", "addr": start + off, "n": n},
+            timeout_s=15.0,
+        )
+        out += _parse_hex_bytes(r.get("hex") if isinstance(r, dict) else None)
+        off += n
+    return bytes(out[:count])
+
+
+def read_ares_range_bytes(ares: AresInstance, start: int, count: int) -> bytes:
+    """Read `count` bytes of the current-frame RDRAM from the Ares side."""
+    out = bytearray()
+    off = 0
+    while off < count:
+        n = min(256, count - off)
+        r = ares.cmd(
+            {"cmd": "read_memory", "addr": 0x80000000 + start + off, "len": n, "order": "recomp"},
+            timeout_s=30.0,
+        )
+        out += _parse_hex_bytes(r.get("bytes") if isinstance(r, dict) else None)
+        off += n
+    return bytes(out[:count])
+
+
+def range_residual(recomp_bytes: bytes, ares_bytes: bytes, start: int, limit: int = 256) -> dict[str, Any]:
+    """Byte-level diff of one range: count + list of differing offsets.
+
+    This is the phase-stripped residual — at a range's best-aligned Ares
+    frame, whatever still differs here is a REAL divergence (not phase noise).
+    """
+    n = min(len(recomp_bytes), len(ares_bytes))
+    diffs: list[dict[str, Any]] = []
+    ndiff = 0
+    for i in range(n):
+        if recomp_bytes[i] != ares_bytes[i]:
+            ndiff += 1
+            if len(diffs) < limit:
+                diffs.append({
+                    "off": start + i,
+                    "vaddr": 0x80000000 + start + i,
+                    "recomp": recomp_bytes[i],
+                    "ares": ares_bytes[i],
+                })
+    return {"n_diff_bytes": ndiff, "n_compared": n, "diffs": diffs}
+
+
 def run_oracle_align(args: argparse.Namespace) -> int:
     exe = host_path(args.exe)
     cwd = host_path(args.cwd)
@@ -1650,6 +1722,17 @@ def run_oracle_align(args: argparse.Namespace) -> int:
                 return 1
         report["recomp_checkpoint"] = checkpoint_key(recomp_step)
 
+        # Per-subsystem phase-aligned residual: the recomp is now HELD at the
+        # checkpoint, so its range bytes are constant across the whole Ares
+        # sweep — capture them once. Ares range bytes are captured per frame in
+        # the sweep below; afterwards each range is aligned to its own
+        # best-matching frame and the leftover byte diff (residual) is the real,
+        # phase-stripped divergence.
+        recomp_range_bytes: dict[str, bytes] = {}
+        ares_range_capture: dict[str, dict[int, bytes]] = {name: {} for name, _, _ in named_ranges}
+        for name, start, end in named_ranges:
+            recomp_range_bytes[name] = read_recomp_range_bytes(recomp, start, end - start)
+
         for warmup in range(1, args.ares_start + 1):
             step = ares.cmd({"cmd": "step_frame", "n": 1}, timeout_s=args.ares_step_timeout)
             if not step.get("ok"):
@@ -1701,6 +1784,10 @@ def run_oracle_align(args: argparse.Namespace) -> int:
                     }
                     for name, start, end in named_ranges
                 ]
+            for name, start, end in named_ranges:
+                ares_range_capture[name][ares_frame] = read_ares_range_bytes(
+                    ares, start, end - start
+                )
             report["rows"].append(row)
 
             if best_row is None:
@@ -1725,6 +1812,34 @@ def run_oracle_align(args: argparse.Namespace) -> int:
                     print(f"FAIL oracle-align Ares step frame={ares_frame + 1}; report={report_path}")
                     return 1
 
+        # --- Per-subsystem phase-aligned residual ---------------------------
+        # For each named range, pick the Ares frame with the FEWEST differing
+        # bytes vs the held recomp checkpoint (its phase-matched frame), and
+        # report the residual there. residual == 0 means the range's divergence
+        # was pure phase (recomp is correct once aligned); residual > 0 is a
+        # real, localized divergence (e.g. the announcer-static audio defect).
+        per_range_alignment: list[dict[str, Any]] = []
+        for name, start, end in named_ranges:
+            rbytes = recomp_range_bytes.get(name, b"")
+            best: dict[str, Any] | None = None
+            for frame in sorted(ares_range_capture[name]):
+                res = range_residual(rbytes, ares_range_capture[name][frame], start)
+                if best is None or res["n_diff_bytes"] < best["residual"]["n_diff_bytes"]:
+                    best = {"ares_frame": frame, "residual": res}
+            entry: dict[str, Any] = {
+                "name": name,
+                "range_start": start,
+                "range_end": end,
+                "range_vaddr": 0x80000000 + start,
+            }
+            if best is not None:
+                entry["best_ares_frame"] = best["ares_frame"]
+                entry["residual_diff_bytes"] = best["residual"]["n_diff_bytes"]
+                entry["n_compared"] = best["residual"]["n_compared"]
+                entry["residual"] = best["residual"]["diffs"]
+            per_range_alignment.append(entry)
+        report["per_range_alignment"] = per_range_alignment
+
         report["ok"] = True
         report["best_by_first_mismatch"] = best_row
         write_report(report_path, report)
@@ -1743,6 +1858,12 @@ def run_oracle_align(args: argparse.Namespace) -> int:
                 )
         else:
             print(f"PASS oracle-align no rows; report={report_path}")
+        for pr in report.get("per_range_alignment", []):
+            if "best_ares_frame" in pr:
+                print(
+                    f"  range {pr['name']}: phase-aligned best_ares_frame={pr['best_ares_frame']} "
+                    f"residual_diff_bytes={pr['residual_diff_bytes']}/{pr.get('n_compared', 0)}"
+                )
         return 0
     finally:
         recomp.stop()
