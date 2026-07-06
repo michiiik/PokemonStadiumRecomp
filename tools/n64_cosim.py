@@ -654,6 +654,19 @@ def parse_rdram_range(value: str) -> tuple[str, int, int]:
     return name, start, end
 
 
+def parse_mask_range(value: str) -> tuple[int, int]:
+    parts = value.split(":")
+    if len(parts) == 3:
+        parts = parts[1:]  # allow name:start:end form, ignore the name
+    if len(parts) != 2:
+        raise CosimError(f"--mask must be start:end (or name:start:end), got {value!r}")
+    lo = rdram_offset(parts[0])
+    hi = rdram_offset(parts[1])
+    if hi <= lo:
+        raise CosimError(f"--mask end must be after start: {value!r}")
+    return lo, hi
+
+
 def summarize_recomp_ares_rdram_diff(diff: dict[str, Any], *, include_bytes: bool = False) -> dict[str, Any]:
     keys = (
         "ok",
@@ -1604,26 +1617,69 @@ def read_ares_range_bytes(ares: AresInstance, start: int, count: int) -> bytes:
     return bytes(out[:count])
 
 
-def range_residual(recomp_bytes: bytes, ares_bytes: bytes, start: int, limit: int = 256) -> dict[str, Any]:
+# libultra thread-queue globals. An empty OSMesgQueue's mtqueue/fullqueue (and
+# empty OSThread lists) point at &__osThreadTail; osCreateMesgQueue writes that
+# sentinel into guest RAM on hardware, but the HLE runtime manages queues
+# host-side and leaves those guest words NULL. A differing word whose Ares value
+# points into this region (with the recomp word NULL) is therefore BENIGN OS
+# linkage, not a real divergence — mask it so it can't bury a real audio bug.
+# (map: __osThreadTail 0x80079620, __osRunQueue ..28, __osActiveQueue ..2c,
+#  __osRunningThread ..30, __osFaultedThread ..34.)
+OS_THREAD_GLOBALS_LO = 0x80079610
+OS_THREAD_GLOBALS_HI = 0x80079640
+
+
+def _word_le(buf: bytes, idx: int) -> int | None:
+    # The recomp checkpoint peek (and the Ares read with order="recomp") return
+    # bytes in the recomp's host byte-swapped order, i.e. a 32-bit guest word
+    # reads back little-endian. So [0x20,0x96,0x07,0x80] == guest 0x80079620.
+    if idx < 0 or idx + 4 > len(buf):
+        return None
+    return int.from_bytes(buf[idx : idx + 4], "little")
+
+
+def range_residual(
+    recomp_bytes: bytes,
+    ares_bytes: bytes,
+    start: int,
+    limit: int = 256,
+    mask_ranges: list[tuple[int, int]] | None = None,
+) -> dict[str, Any]:
     """Byte-level diff of one range: count + list of differing offsets.
 
     This is the phase-stripped residual — at a range's best-aligned Ares
-    frame, whatever still differs here is a REAL divergence (not phase noise).
+    frame, whatever still differs here is a REAL divergence (not phase noise) —
+    EXCEPT benign HLE OS-object divergence, which is masked: explicit
+    `mask_ranges` (paddr [lo,hi)) plus an auto-mask for empty-queue/thread
+    sentinel words (Ares points into the OS thread-globals, recomp is NULL).
     """
     n = min(len(recomp_bytes), len(ares_bytes))
+    masks = mask_ranges or []
     diffs: list[dict[str, Any]] = []
     ndiff = 0
+    nmasked = 0
     for i in range(n):
-        if recomp_bytes[i] != ares_bytes[i]:
-            ndiff += 1
-            if len(diffs) < limit:
-                diffs.append({
-                    "off": start + i,
-                    "vaddr": 0x80000000 + start + i,
-                    "recomp": recomp_bytes[i],
-                    "ares": ares_bytes[i],
-                })
-    return {"n_diff_bytes": ndiff, "n_compared": n, "diffs": diffs}
+        if recomp_bytes[i] == ares_bytes[i]:
+            continue
+        addr = start + i
+        if any(lo <= addr < hi for lo, hi in masks):
+            nmasked += 1
+            continue
+        woff = (addr & ~3) - start
+        aw = _word_le(ares_bytes, woff)
+        rw = _word_le(recomp_bytes, woff)
+        if aw is not None and OS_THREAD_GLOBALS_LO <= aw < OS_THREAD_GLOBALS_HI and (rw == 0 or rw is None):
+            nmasked += 1
+            continue
+        ndiff += 1
+        if len(diffs) < limit:
+            diffs.append({
+                "off": addr,
+                "vaddr": 0x80000000 + addr,
+                "recomp": recomp_bytes[i],
+                "ares": ares_bytes[i],
+            })
+    return {"n_diff_bytes": ndiff, "n_masked_bytes": nmasked, "n_compared": n, "diffs": diffs}
 
 
 def run_oracle_align(args: argparse.Namespace) -> int:
@@ -1647,6 +1703,7 @@ def run_oracle_align(args: argparse.Namespace) -> int:
 
     watch_offsets = [rdram_offset(v) for v in args.watch]
     named_ranges = [parse_rdram_range(v) for v in args.ranges]
+    mask_ranges = [parse_mask_range(v) for v in getattr(args, "mask", [])]
     recomp = Instance("recomp_align", exe, cwd, args.base_port, log_dir)
     ares = AresInstance("ares_align", ares_exe, rom, ares_cwd, args.base_port + 1, log_dir)
     report: dict[str, Any] = {
@@ -1823,7 +1880,9 @@ def run_oracle_align(args: argparse.Namespace) -> int:
             rbytes = recomp_range_bytes.get(name, b"")
             best: dict[str, Any] | None = None
             for frame in sorted(ares_range_capture[name]):
-                res = range_residual(rbytes, ares_range_capture[name][frame], start)
+                res = range_residual(
+                    rbytes, ares_range_capture[name][frame], start, mask_ranges=mask_ranges
+                )
                 if best is None or res["n_diff_bytes"] < best["residual"]["n_diff_bytes"]:
                     best = {"ares_frame": frame, "residual": res}
             entry: dict[str, Any] = {
@@ -1835,6 +1894,7 @@ def run_oracle_align(args: argparse.Namespace) -> int:
             if best is not None:
                 entry["best_ares_frame"] = best["ares_frame"]
                 entry["residual_diff_bytes"] = best["residual"]["n_diff_bytes"]
+                entry["residual_masked_bytes"] = best["residual"].get("n_masked_bytes", 0)
                 entry["n_compared"] = best["residual"]["n_compared"]
                 entry["residual"] = best["residual"]["diffs"]
             per_range_alignment.append(entry)
@@ -1862,7 +1922,8 @@ def run_oracle_align(args: argparse.Namespace) -> int:
             if "best_ares_frame" in pr:
                 print(
                     f"  range {pr['name']}: phase-aligned best_ares_frame={pr['best_ares_frame']} "
-                    f"residual_diff_bytes={pr['residual_diff_bytes']}/{pr.get('n_compared', 0)}"
+                    f"residual_diff_bytes={pr['residual_diff_bytes']}/{pr.get('n_compared', 0)} "
+                    f"(masked {pr.get('residual_masked_bytes', 0)})"
                 )
         return 0
     finally:
@@ -2012,6 +2073,14 @@ def main(argv: list[str]) -> int:
         action="append",
         default=[],
         help="named RDRAM range to diff at every row: name:start:end",
+    )
+    align.add_argument(
+        "--mask",
+        action="append",
+        default=[],
+        help="exclude a [start:end) range (or name:start:end) from the phase-aligned "
+        "residual — for benign HLE OS-object fields (OSMesgQueue, OSPiHandle). "
+        "Empty-queue/thread sentinel words are auto-masked already.",
     )
     align.add_argument("--watch-len", type=int, default=4)
     align.add_argument("--include-peek-bytes", action="store_true")
