@@ -1,3 +1,6 @@
 [submodule "disasm"]
 	path = disasm
 	url = https://github.com/pret/pokestadium
+[submodule "N64Recomp"]
+	path = engine/N64Recomp
+	url = https://github.com/mstan/N64Recomp.git

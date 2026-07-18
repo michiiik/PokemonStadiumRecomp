@@ -253,7 +253,7 @@ dump.
 PokemonStadiumRecomp/
 ├── baserom.z64                     # canonical ROM (gitignored)
 ├── disasm/                         # pret/pokestadium submodule
-├── n64recomp/                      # N64Recomp engine (junction by setup)
+├── engine/N64Recomp/               # pinned N64Recomp submodule
 ├── ares-bridge/                    # Ares oracle integration (TODO subproject)
 ├── ghidra/                         # Ghidra project + instructions
 ├── generated/                      # recompiler C output (gitignored)
@@ -261,7 +261,6 @@ PokemonStadiumRecomp/
 ├── tests/                          # regression tests
 ├── docs/                           # design notes
 ├── game.toml                       # N64Recomp config
-├── n64recomp.pin                   # engine SHA pin
 ├── CMakeLists.txt                  # build entrypoint
 ├── setup.sh / setup.bat            # provisioning
 ├── DEBUG.md                        # divergence triage protocol
@@ -283,8 +282,7 @@ setup.bat
 ```
 
 This:
-1. Clones (or junctions) `n64recomp/` at the SHA pinned in
-   `n64recomp.pin`.
+1. Initializes the pinned `engine/N64Recomp/` submodule.
 2. Initializes the `disasm/` submodule (pret/pokestadium).
 3. Stages `baserom.z64` into `disasm/baseroms/us/`.
 

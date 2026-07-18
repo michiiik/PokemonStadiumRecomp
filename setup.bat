@@ -8,45 +8,13 @@
 ::   3. Stages the verified baserom.z64 into disasm\baseroms\us\.
 ::   4. (Optional) Clones Ares emulator if WITH_ARES=1.
 
-setlocal enabledelayedexpansion
+setlocal
 
-set "N64RECOMP_REPO=https://github.com/N64Recomp/N64Recomp.git"
 set "ARES_REPO=https://github.com/ares-emulator/ares.git"
-set "SISTER_N64RECOMP=..\N64Recomp"
 
-:: ---- Parse SHA from n64recomp.pin ----
-set "SHA="
-for /f "usebackq tokens=1,* delims==" %%a in ("n64recomp.pin") do (
-    set "key=%%a"
-    set "key=!key: =!"
-    if "!key!"=="sha" (
-        set "SHA=%%b"
-        set "SHA=!SHA: =!"
-    )
-)
-if not defined SHA (
-    echo Error: no sha found in n64recomp.pin
-    exit /b 1
-)
-
-:: ---- Provision n64recomp\ ----
-if not exist "n64recomp" (
-    if exist "%SISTER_N64RECOMP%\.git" (
-        echo Junctioning n64recomp -^> %SISTER_N64RECOMP%
-        mklink /J n64recomp %SISTER_N64RECOMP%
-    ) else (
-        echo Cloning N64Recomp...
-        git clone --recurse-submodules %N64RECOMP_REPO% n64recomp
-    )
-)
-
-:: ---- Pin enforcement ----
-for /f %%h in ('git -C n64recomp rev-parse HEAD') do set "ACTUAL=%%h"
-if not "!ACTUAL!"=="%SHA%" (
-    echo Note: n64recomp HEAD ^(!ACTUAL!^) != pinned ^(%SHA%^).
-    echo   To align: git -C n64recomp checkout %SHA%
-    echo   To roll forward: edit n64recomp.pin to sha = !ACTUAL!
-)
+:: ---- Framework and disassembly submodules ----
+git submodule update --init --recursive engine/N64Recomp disasm
+if errorlevel 1 exit /b %errorlevel%
 
 :: ---- Disasm submodule ----
 git submodule update --init --recursive disasm

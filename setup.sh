@@ -12,35 +12,10 @@
 
 set -euo pipefail
 
-N64RECOMP_REPO="https://github.com/N64Recomp/N64Recomp.git"
 ARES_REPO="https://github.com/ares-emulator/ares.git"
-SISTER_N64RECOMP="../N64Recomp"   # local sister-dir checkout, if present
 
-# ---- Parse SHA from n64recomp.pin ----
-SHA=$(sed -n 's/^[[:space:]]*sha[[:space:]]*=[[:space:]]*//p' n64recomp.pin | tr -d '[:space:]')
-if [ -z "$SHA" ]; then
-    echo "Error: no sha found in n64recomp.pin" >&2
-    exit 1
-fi
-
-# ---- Provision n64recomp/ ----
-if [ ! -e "n64recomp" ]; then
-    if [ -d "$SISTER_N64RECOMP/.git" ]; then
-        echo "Linking n64recomp/ -> $SISTER_N64RECOMP (sister checkout)..."
-        ln -s "$SISTER_N64RECOMP" n64recomp
-    else
-        echo "Cloning N64Recomp..."
-        git clone --recurse-submodules "$N64RECOMP_REPO" n64recomp
-    fi
-fi
-
-# ---- Pin enforcement ----
-ACTUAL=$(git -C n64recomp rev-parse HEAD)
-if [ "$ACTUAL" != "$SHA" ]; then
-    echo "Note: n64recomp HEAD ($ACTUAL) != pinned ($SHA)."
-    echo "  To align: git -C n64recomp checkout $SHA"
-    echo "  To roll forward: edit n64recomp.pin to sha = $ACTUAL"
-fi
+# ---- Framework and disassembly submodules ----
+git submodule update --init --recursive engine/N64Recomp disasm
 
 # ---- Disasm submodule ----
 git submodule update --init --recursive disasm
@@ -76,7 +51,7 @@ fi
 
 echo
 echo "Setup complete."
-echo "  n64recomp/   $(git -C n64recomp rev-parse --short HEAD 2>/dev/null || echo '?')"
+echo "  N64Recomp/   $(git -C engine/N64Recomp rev-parse --short HEAD 2>/dev/null || echo '?')"
 echo "  disasm/      $(git -C disasm rev-parse --short HEAD 2>/dev/null || echo '?')"
 echo
 echo "Next:"
