@@ -1,3 +1,47 @@
+## ⚠️ Project Status: No Longer Maintained
+
+**As of August 2026, this project is no longer maintained.** The repository
+stays up, existing releases stay available, and the source remains fully
+buildable — but there will be no further bugfixes or releases.
+
+### Why
+
+This project is built on **N64Recomp, a toolchain I forked but did not
+create**. After months of working inside it, my conclusion is that its
+architecture is structurally unsound — the problems are foundational, not
+fixable from a fork — and **I can't stand behind work built on it**, in this
+project or any future one.
+
+My other recompilation ecosystems
+([NESRecomp](https://github.com/mstan/nesrecomp),
+[SNESRecomp](https://github.com/mstan/snesrecomp),
+[PSXRecomp](https://github.com/mstan/psxrecomp),
+[NDSRecomp](https://github.com/mstan/ndsrecomp)) are toolchains I created
+from the ground up, built with my standards and vision in mind. That's where
+my time is going: maintaining the ecosystems I've committed to and continuing
+to improve them, rather than propping up a foundation I believe
+unmaintainable.
+
+### What this means for you
+
+- **The game still works.** The latest release (v0.4.6-beta) remains
+  downloadable and playable as-is.
+- **Known issues will not be fixed.** [`ISSUES.md`](ISSUES.md) and the issue
+  tracker describe the state the project was left in; new reports won't be
+  acted on.
+- **The source stays public and buildable** at the pinned commits, per the
+  GPL. Forks are welcome.
+
+### The future
+
+I haven't lost interest in Pokémon Stadium — I've lost confidence in this
+foundation. If a foundation for N64 recompilation exists someday that I
+believe in and can stand behind, I may revisit this game and rebuild it
+properly. Until then, this repository is a finished artifact, not an active
+project.
+
+---
+
 # PokemonStadiumRecomp — SS Anne
 
 Static recompilation of **Pokémon Stadium (US v1.0)** to native PC.
