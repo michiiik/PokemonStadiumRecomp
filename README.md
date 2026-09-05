@@ -1,8 +1,7 @@
 ## ⚠️ Project Status: No Longer Maintained
 
 **As of August 2026, this project is no longer maintained.** The repository
-stays up, existing releases stay available, and the source remains fully
-buildable — but there will be no further bugfixes or releases.
+stays up, existing releases stay available, and the source remains public — but there will be no further bugfixes or releases.
 
 ### Why
 
@@ -45,16 +44,16 @@ project.
 # PokemonStadiumRecomp — SS Anne
 
 Static recompilation of **Pokémon Stadium (US v1.0)** to native PC.
-Built on top of [N64Recomp](https://github.com/N64Recomp/N64Recomp).
+Built on top of [N64Recomp](https://github.com/michiiik/N64Recomp).
 
 This project is **SS Anne**, a Pokémon Stadium recompilation: it turns the
 original game into a native PC program instead of running it in an
 emulator. It is built on the N64Recomp toolchain and depends on a set of
 companion forks maintained alongside it:
 
-- [N64Recomp](https://github.com/mstan/N64Recomp) — the static recompiler
-- [N64ModernRuntime](https://github.com/mstan/N64ModernRuntime) — the runtime that stands in for the N64's operating system
-- [rt64](https://github.com/mstan/rt64) — the graphics renderer
+- [N64Recomp](https://github.com/michiiik/N64Recomp) — the static recompiler
+- [N64ModernRuntime](https://github.com/michiiik/N64ModernRuntime) — the runtime that stands in for the N64's operating system
+- [rt64](https://github.com/michiiik/rt64) — the graphics renderer
 
 Each of those repositories lists, at the top of its own README, the
 changes made to it for this project.
@@ -230,7 +229,7 @@ To proceed:
    one-way switch until a Windows reset.
 2. If you'd rather not trust a prebuilt binary at all, **build it yourself
    from source** — the whole toolchain is in this repo and the companion
-   forks. See [Quick start](#quick-start). A build you compiled locally
+   forks. See [Build from source](#build-from-source). A build you compiled locally
    won't be flagged.
 
 There is no malware in the release. The source is fully public; you're
@@ -296,9 +295,11 @@ dump.
 ```
 PokemonStadiumRecomp/
 ├── baserom.z64                     # canonical ROM (gitignored)
-├── disasm/                         # pret/pokestadium submodule
-├── n64recomp/                      # N64Recomp engine (junction by setup)
-├── ares-bridge/                    # Ares oracle integration (TODO subproject)
+├── disasm/                         # michiiik/pokestadium submodule
+├── n64recomp/                      # michiiik/N64Recomp submodule
+├── lib/N64ModernRuntime/           # native runtime submodule
+├── lib/rt64/                       # renderer submodule
+├── recomp-ui/                      # launcher UI submodule
 ├── ghidra/                         # Ghidra project + instructions
 ├── generated/                      # recompiler C output (gitignored)
 ├── tools/                          # game-specific tooling
@@ -307,41 +308,194 @@ PokemonStadiumRecomp/
 ├── game.toml                       # N64Recomp config
 ├── n64recomp.pin                   # engine SHA pin
 ├── CMakeLists.txt                  # build entrypoint
-├── setup.sh / setup.bat            # provisioning
+├── setup.sh / setup.bat            # legacy helpers; follow the guide below
 ├── DEBUG.md                        # divergence triage protocol
 ├── ISSUES.md / MODDING.md
 └── README.md
 ```
 
-## Quick start
+## Build from source
 
-Prereqs: git, python3, cmake 3.20+, a working C/C++ toolchain. For
-the disasm build (optional): `make`, `binutils-mips-linux-gnu`.
+The repository uses nested, pinned submodules. Do not use `--recursive` on the
+initial clone: two optional Ares gitlinks currently point to commits that are
+not available from the public Ares remote. The default build uses placeholder
+mode and does not require Ares.
 
-```bash
-# Linux / macOS
-chmod +x setup.sh && ./setup.sh
+While those optional pins remain unavailable, the manual initialization steps
+below are authoritative. The existing setup helpers are retained for reference
+and should not be relied on for recursive initialization.
 
-# Windows
-setup.bat
+### Prerequisites
+
+- All platforms: Git, Python 3, CMake, Ninja, and enough disk space for the
+  nested dependencies and generated C.
+- Windows: Visual Studio 2022 with C++ tools for `N64Recomp`, LLVM/Clang
+  (`clang-cl`, `llvm-rc`) and Ninja for the native runner, plus WSL for the
+  disassembly build.
+- Linux: LLVM Clang, Make, SDL2 development files, `pkg-config`, Python 3, and
+  MIPS binutils (normally commands prefixed `mips-linux-gnu-`).
+- macOS: Xcode Command Line Tools (Apple Clang), CMake, Ninja, SDL2,
+  `pkg-config`, Python 3, Make, and MIPS binutils. Set
+  `MIPS_BINUTILS_PREFIX` if they use a different prefix.
+
+There is currently no Android Gradle target in this Stadium 1 repository.
+
+The Linux commands below are source-derived and have not been executed in the
+current validation environment. Its WSL Ubuntu installation did not yet have
+CMake, Ninja, `clang++`, `pkg-config`/SDL2 metadata, or MIPS binutils installed.
+
+### 1. Clone and initialize dependencies
+
+PowerShell:
+
+```powershell
+git clone https://github.com/michiiik/PokemonStadiumRecomp.git
+Set-Location PokemonStadiumRecomp
+git submodule update --init
+git -C lib/N64ModernRuntime submodule update --init -- N64Recomp
+git -C n64recomp config submodule.ares-bridge/third_party/ares.update none
+git -C lib/N64ModernRuntime/N64Recomp config submodule.ares-bridge/third_party/ares.update none
+git submodule update --init --recursive
 ```
 
-This:
-1. Clones (or junctions) `n64recomp/` at the SHA pinned in
-   `n64recomp.pin`.
-2. Initializes the `disasm/` submodule (pret/pokestadium).
-3. Stages `baserom.z64` into `disasm/baseroms/us/`.
-
-Optional: clone the Ares oracle with `WITH_ARES=1 ./setup.sh`. See
-the *Oracle* section below — the bridge code is not yet written.
-
-To build the disasm (sanity check that the ROM and pret align):
+Linux and macOS:
 
 ```bash
-cd disasm
-make init     # extracts assets from the staged baserom
-make          # rebuilds an identical pokestadium-us.z64 from sources
+git clone https://github.com/michiiik/PokemonStadiumRecomp.git
+cd PokemonStadiumRecomp
+git submodule update --init
+git -C lib/N64ModernRuntime submodule update --init -- N64Recomp
+git -C n64recomp config submodule.ares-bridge/third_party/ares.update none
+git -C lib/N64ModernRuntime/N64Recomp config submodule.ares-bridge/third_party/ares.update none
+git submodule update --init --recursive
 ```
+
+The two local `update none` settings skip only the unavailable optional Ares
+pins. They do not modify tracked files. All dependencies required by the
+default placeholder build are still initialized recursively.
+
+### 2. Build the disassembly ELF
+
+Place a legally obtained, exact Pokémon Stadium US v1.0 ROM at
+`baserom.z64`, then copy it to the disassembly's ignored input location.
+The expected identity is listed in [ROM](#rom).
+
+On Windows, run this stage in WSL from the repository mounted under `/mnt`:
+
+```bash
+mkdir -p disasm/baseroms/us
+cp baserom.z64 disasm/baseroms/us/baserom.z64
+make -C disasm init
+make -C disasm -j"$(nproc)"
+test -f disasm/build/pokestadium-us.elf
+```
+
+Linux uses the same commands. On macOS, replace `$(nproc)` with
+`$(sysctl -n hw.logicalcpu)`. The required output is
+`disasm/build/pokestadium-us.elf`.
+
+### 3. Build the N64Recomp CLI
+
+From a Visual Studio 2022 Developer PowerShell:
+
+```powershell
+cmake -S n64recomp -B n64recomp/build-vs -G "Visual Studio 17 2022" -A x64
+cmake --build n64recomp/build-vs --config Release --target N64RecompCLI
+```
+
+The Windows executable is
+`n64recomp/build-vs/Release/N64Recomp.exe`.
+
+Linux:
+
+```bash
+cmake -S n64recomp -B n64recomp/build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+cmake --build n64recomp/build --target N64RecompCLI
+```
+
+macOS:
+
+```bash
+cmake -S n64recomp -B n64recomp/build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER="$(xcrun --find clang)" \
+  -DCMAKE_CXX_COMPILER="$(xcrun --find clang++)"
+cmake --build n64recomp/build --target N64RecompCLI
+```
+
+The Linux/macOS executable is `n64recomp/build/N64Recomp`.
+
+### 4. Generate the recompiled C sources
+
+PowerShell:
+
+```powershell
+& .\n64recomp\build-vs\Release\N64Recomp.exe game.toml
+if ($LASTEXITCODE -ne 0) { throw "N64Recomp generation failed" }
+```
+
+Linux and macOS:
+
+```bash
+./n64recomp/build/N64Recomp game.toml
+```
+
+This writes the ignored `generated/` directory. Generation is currently known
+to exit nonzero because hook `func_81206D9C` is missing. If N64Recomp exits
+nonzero, any files it left in `generated/` are incomplete and must not be
+treated as valid build input.
+
+### 5. Configure and build the native runner
+
+Windows, from a shell where `clang-cl`, `llvm-rc`, Ninja, and the Visual Studio
+linker environment are available:
+
+```powershell
+cmake -S . -B build-native -G Ninja `
+  -DCMAKE_BUILD_TYPE=Release `
+  -DCMAKE_C_COMPILER=clang-cl `
+  -DCMAKE_CXX_COMPILER=clang-cl `
+  -DCMAKE_RC_COMPILER=llvm-rc
+cmake --build build-native --target PokemonStadiumRecomp --parallel 2
+```
+
+The intended Windows executable is `build-native/PokemonStadiumRecomp.exe`.
+
+Linux:
+
+```bash
+cmake -S . -B build-native -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+cmake --build build-native --target PokemonStadiumRecomp --parallel 2
+```
+
+macOS:
+
+```bash
+cmake -S . -B build-native -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER="$(xcrun --find clang)" \
+  -DCMAKE_CXX_COMPILER="$(xcrun --find clang++)"
+cmake --build build-native --target PokemonStadiumRecomp --parallel 2
+```
+
+The intended Linux/macOS executable is `build-native/PokemonStadiumRecomp`.
+
+### Current validation status (September 2026)
+
+These are measured results, not a claim that the full source pipeline succeeds:
+
+| Stage | Measured result |
+|-------|-----------------|
+| Nested dependencies, Windows | Top-level pins and every required non-Ares recursive module initialized successfully. |
+| Nested dependencies, macOS | Fresh clones reproduced the same result; only the two deliberately skipped Ares paths remained uninitialized. |
+| Linux | Commands are source-derived and unexecuted; the available WSL environment lacks the prerequisites listed above. |
+| N64Recomp CLI, Windows | Built successfully with Visual Studio 2022. |
+| Code generation | Exits nonzero because hook `func_81206D9C` is missing; partial `generated/` output is invalid. |
+| Native configure, Windows | CMake/Ninja configure passed with clang-cl 22. |
+| Native build, Windows clang-cl | Stops in pinned fmt consteval handling; no full build success is claimed. |
+| Native build, Windows MSVC | Also rejects Clang-style warning flags in the Stadium 1 runner configuration. |
+| Native configure, macOS | Passed with Apple Clang 21, CMake 4.4, Ninja, SDL2, and a generated snapshot. |
+| Native build, macOS | Stops around target 83-87 in pinned `fmt/src/os.cc` consteval errors (first seen at lines 172, 218, and 287). No later blocker was reached. |
 
 ## Transfer Pak
 
