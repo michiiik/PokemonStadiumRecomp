@@ -139,9 +139,13 @@ if(PSR_GEO_PROBE)
 endif()
 
 # ---- Runner executable ------------------------------------------------------
+set(PSR_POST_MORTEM_SOURCE src/main/post_mortem.cpp)
+if (NOT WIN32)
+    set(PSR_POST_MORTEM_SOURCE src/main/post_mortem_stub.cpp)
+endif()
 add_executable(PokemonStadiumRecomp
     src/main/main.cpp
-    src/main/post_mortem.cpp
+    ${PSR_POST_MORTEM_SOURCE}
     src/main/rt64_render_context.cpp
     src/main/debug_server.cpp
     src/main/ares_worker.cpp

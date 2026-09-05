@@ -21,6 +21,7 @@
  * commands here. Don't add side-channel logging.
  */
 
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <winsock2.h>
@@ -28,6 +29,18 @@
 #include <dbghelp.h>
 #include <tlhelp32.h>
 #pragma comment(lib, "dbghelp.lib")
+#else
+#include <arpa/inet.h>
+#include <cerrno>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+using SOCKET = int;
+#define INVALID_SOCKET (-1)
+#define SOCKET_ERROR (-1)
+static inline int closesocket(SOCKET s) { return ::close(s); }
+static inline int WSAGetLastError() { return errno; }
+#endif
 
 #include <algorithm>
 #include <atomic>
@@ -47,7 +60,9 @@
 #include "ares_bridge.h"
 #include "ares_worker.h"
 
+#ifdef _WIN32
 #pragma comment(lib, "ws2_32.lib")
+#endif
 
 // Function-trace ring queries (definitions in extras.c).
 extern "C" {
@@ -2317,6 +2332,9 @@ static std::string handle_command(const std::string& line) {
         return out;
     }
     if (cmd == "dump_threads") {
+#ifndef _WIN32
+        return R"({"ok":false,"error":"dump_threads is Windows-only"})";
+#else
         // Walk every OS thread in this process, capture its host call
         // stack, symbolize, and write it to last_error.log. Lets us
         // diagnose deep stalls (e.g. attract demo blocked in an
@@ -2388,33 +2406,40 @@ static std::string handle_command(const std::string& line) {
         char buf[64];
         std::snprintf(buf, sizeof(buf), R"({"ok":true,"threads":%d})", n_threads);
         return buf;
+#endif
     }
     if (cmd == "quit") {
+#ifdef _WIN32
         ExitProcess(0);  // hard exit â€” debug-driven shutdown
+#else
+        std::_Exit(0);
+#endif
         return R"({"ok":true})";
     }
     return R"({"ok":false,"error":"unknown command"})";
 }
 
 static void server_loop(int port) {
+#ifdef _WIN32
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
         fprintf(stderr, "[dbg] WSAStartup failed\n");
         return;
     }
+#endif
     s_listen_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (s_listen_sock == INVALID_SOCKET) {
         fprintf(stderr, "[dbg] socket() failed\n");
         return;
     }
 
-    BOOL reuse = TRUE;
+    int reuse = 1;
     setsockopt(s_listen_sock, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse));
 
     sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    addr.sin_addr.S_un.S_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     if (bind(s_listen_sock, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
         fprintf(stderr, "[dbg] bind() failed err=%d\n", WSAGetLastError());
         return;
@@ -2428,7 +2453,11 @@ static void server_loop(int port) {
 
     while (s_running.load()) {
         sockaddr_in caddr{};
+#ifdef _WIN32
         int caddr_len = sizeof(caddr);
+#else
+        socklen_t caddr_len = sizeof(caddr);
+#endif
         SOCKET client = accept(s_listen_sock, (sockaddr*)&caddr, &caddr_len);
         if (client == INVALID_SOCKET) {
             if (!s_running.load()) break;
@@ -2456,7 +2485,9 @@ static void server_loop(int port) {
     }
 
     closesocket(s_listen_sock);
+#ifdef _WIN32
     WSACleanup();
+#endif
 }
 
 void start(int port) {

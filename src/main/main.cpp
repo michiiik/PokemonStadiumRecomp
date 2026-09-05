@@ -33,7 +33,11 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#ifndef _WIN32
+#include <sys/stat.h>
+#endif
 
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
@@ -47,6 +51,7 @@
 #undef OPTIONAL
 #undef min
 #undef max
+#endif
 
 #include <SDL.h>
 #include <SDL_syswm.h>
@@ -1432,6 +1437,17 @@ static ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callba
 // TCP `fast_forward` toggles still update g_fast_forward directly,
 // which is consistent so long as TAB isn't being held at toggle time.
 static std::atomic<bool> s_turbo_persistent{false};
+
+namespace ultramodern::input {
+float apply_stick_deadzone(int32_t value, int32_t deadzone) {
+    const int32_t magnitude = value < 0 ? -value : value;
+    if (magnitude <= deadzone) return 0.0f;
+    const float scaled = static_cast<float>(magnitude - deadzone) /
+                         static_cast<float>(32767 - deadzone);
+    const float clamped = scaled > 1.0f ? 1.0f : scaled;
+    return value < 0 ? -clamped : clamped;
+}
+} // namespace ultramodern::input
 
 static void update_gfx(void*) {
     // The launcher now runs pre-boot in its own window (recompui_launcher.cpp);
