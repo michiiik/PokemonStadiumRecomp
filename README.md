@@ -458,7 +458,7 @@ setup); the bridge code (`ares_bridge.cpp`, `n64_snapshot.c`,
 - [`docs/graphics.md`](docs/graphics.md) — anti-aliasing + supersampling options.
 - [`DEBUG.md`](DEBUG.md) — debug + divergence protocol.
 - [`ISSUES.md`](ISSUES.md) — known issues + open work.
-- [`MODDING.md`](MODDING.md) — modding hooks (post-MVP).
+- [`MODDING.md`](MODDING.md) — install and build N64Recomp `.nrm` code mods.
 - [`ghidra/instructions.txt`](ghidra/instructions.txt) — Ghidra setup.
 
 ## Acknowledgements

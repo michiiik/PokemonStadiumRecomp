@@ -3,7 +3,7 @@
  *
  * Adapted from Zelda64Recomp's src/main/main.cpp. Strips:
  *   - recompui (UI overlay; no menu yet)
- *   - mod loader / texture pack subsystem
+ *   - texture pack subsystem
  *   - Native file dialogs
  *   - Game-specific config + autosave
  *
@@ -2116,7 +2116,17 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "[PSR] debug server started on tcp:%d\n", debug_port); std::fflush(stderr);
 
     recomp::Version project_version{0, 1, 0, ""};
-    recomp::register_config_path(std::filesystem::current_path());
+
+    // Keep mods and their configuration beside the portable executable. The
+    // runtime creates <config path>/mods and <config path>/mod_config, scans
+    // .nrm packages during recomp::start(), and loads enabled code mods when
+    // start_game() is called. Using the executable directory makes discovery
+    // independent of the shell or shortcut's working directory.
+    const std::filesystem::path runtime_root = pkmnstadium::exe_dir();
+    recomp::register_config_path(runtime_root);
+    std::fprintf(stderr, "[PSR] mods directory: %s\n",
+        (runtime_root / "mods").string().c_str());
+    std::fflush(stderr);
     pkmnstadium::transfer_pak::initialize();
 
     // Resolve all launch-time graphics settings from launcher.cfg (+ env

@@ -1,0 +1,19 @@
+[manifest]
+id = "hello_stadium"
+version = "0.1.0"
+display_name = "Hello Stadium"
+description = "A behavior-neutral example mod for Pokemon Stadium Recompiled."
+short_description = "Prints a message when Stadium initializes its main pools."
+authors = [ "Pokemon Stadium Recompiled contributors" ]
+game_id = "pokestadium"
+minimum_recomp_version = "0.1.0"
+dependencies = []
+optional_dependencies = []
+native_libraries = []
+
+[inputs]
+elf_path = "mod.elf"
+mod_filename = "hello_stadium"
+func_reference_syms_file = "symbols/pokestadium.us.1.0.syms.toml"
+data_reference_syms_files = []
+additional_files = []

@@ -1,0 +1,11 @@
+# Minimal reference-symbol subset for the behavior-neutral example mod.
+# Addresses are from pokestadium US v1.0 and the pinned decompilation revision.
+[[section]]
+name = "..text"
+rom = 0x00001000
+vram = 0x80000400
+size = 0x7E980
+
+functions = [
+    { name = "Util_InitMainPools", vram = 0x80002F58, size = 0x84 },
+]

@@ -1,0 +1,85 @@
+name: Hello Stadium mod
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/hello_stadium_mod/**"
+      - "tools/recomp_mod_tool/**"
+      - "tools/verify_nrm.py"
+      - ".github/workflows/hello-stadium-mod.yml"
+  pull_request:
+    paths:
+      - "examples/hello_stadium_mod/**"
+      - "tools/recomp_mod_tool/**"
+      - "tools/verify_nrm.py"
+      - ".github/workflows/hello-stadium-mod.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize runtime mod-tool dependencies
+        shell: bash
+        run: |
+          git submodule update --init lib/N64ModernRuntime
+          git -C lib/N64ModernRuntime submodule update --init N64Recomp
+          git -C lib/N64ModernRuntime/N64Recomp submodule update --init \
+            lib/ELFIO lib/fmt lib/rabbitizer lib/sljit lib/tomlplusplus
+
+      - name: Install LLVM 18 (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-18 lld-18 ninja-build
+          echo "PSR_MOD_CLANG=/usr/bin/clang-18" >> "$GITHUB_ENV"
+          echo "PSR_MOD_LLD=/usr/bin/ld.lld-18" >> "$GITHUB_ENV"
+
+      - name: Install LLVM 18 (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm@18 ninja
+          echo "PSR_MOD_CLANG=$(brew --prefix llvm@18)/bin/clang" >> "$GITHUB_ENV"
+          echo "PSR_MOD_LLD=$(brew --prefix llvm@18)/bin/ld.lld" >> "$GITHUB_ENV"
+
+      - name: Install LLVM 18 (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install llvm --version=18.1.8 --allow-downgrade --force -y
+          "PSR_MOD_CLANG=C:/Program Files/LLVM/bin/clang.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "PSR_MOD_LLD=C:/Program Files/LLVM/bin/ld.lld.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+
+      - name: Build RecompModTool
+        run: |
+          cmake -S tools/recomp_mod_tool -B build/mod-tool -G Ninja -DCMAKE_BUILD_TYPE=Release -DWITH_ARES_BRIDGE=OFF
+          cmake --build build/mod-tool --target RecompModTool
+
+      - name: Build example package
+        shell: bash
+        run: |
+          tool_suffix=""
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then tool_suffix=".exe"; fi
+          cmake -S examples/hello_stadium_mod -B build/hello-stadium -G Ninja \
+            -DRECOMP_MOD_TOOL="$PWD/build/mod-tool/RecompModTool${tool_suffix}" \
+            -DPSR_MOD_CLANG="$PSR_MOD_CLANG" \
+            -DPSR_MOD_LLD="$PSR_MOD_LLD"
+          cmake --build build/hello-stadium --target package
+          python tools/verify_nrm.py build/hello-stadium/hello_stadium.nrm \
+            --game-id pokestadium --mod-id hello_stadium
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hello-stadium-${{ runner.os }}
+          path: build/hello-stadium/hello_stadium.nrm
