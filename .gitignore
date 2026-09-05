@@ -30,13 +30,6 @@ ghidra/**/tmp*.ps
 ares-emulator/
 
 # N64Recomp engine checkout (cloned by setup.bat/sh, not committed)
-
-# Retired nested dependency checkouts. The workspace uses sibling repositories
-# under ../../decomp and ../../toolchain; local copies are kept ignored so they
-# can be preserved during migration without being recommitted.
-/disasm/
-/recomp-ui/
-
 n64recomp/
 
 # Editor / OS

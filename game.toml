@@ -25,9 +25,9 @@ trace_mode = true
 # The verified v1.0 ROM. CMake asserts MD5 ed1378bc...
 rom_file_path = "baserom.z64"
 
-# The ELF produced by the sibling michiiik/pokestadium checkout after
-# `make init && make`. Carries section addresses, symbols, relocations.
-elf_path = "../../decomp/pokestadium/build/pokestadium-us.elf"
+# The ELF that pret's disasm produces after `make init && make`
+# in disasm/. Carries section addresses, symbols, relocations.
+elf_path = "disasm/build/pokestadium-us.elf"
 
 # Output directory for generated C — gitignored. N64Recomp emits
 # funcs.h, funcs_N.c per function group, recomp_overlays.inl,
@@ -1993,7 +1993,7 @@ ignored = [
 [[input.manual_funcs]]
 # proutSprintf — libultra static helper used by sprintf as the
 # putput callback to _Printf. Declared `static` in pret's
-# ../../decomp/pokestadium/lib/ultralib/src/libc/sprintf.c, which is why the
+# disasm/lib/ultralib/src/libc/sprintf.c, which is why the
 # recompiler's auto-discovery skips it; sprintf passes it as a
 # function pointer (vaddr 0x8005E020), and at the indirect call
 # inside _Printf the func_map lookup misses → trampoline-abort.

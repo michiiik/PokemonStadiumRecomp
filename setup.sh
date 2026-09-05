@@ -1,66 +1,85 @@
 #!/usr/bin/env bash
-# Verify the shared Pokemon Stadium workspace layout.
+# PokemonStadiumRecomp setup — Linux / macOS / Git-Bash
+#
+# What this does:
+#   1. Clones N64Recomp into n64recomp/ at the SHA pinned in
+#      n64recomp.pin (or junctions to a sister checkout if present).
+#   2. Initializes the disasm submodule (pret/pokestadium).
+#   3. Stages the verified baserom.z64 into disasm/baseroms/us/.
+#   4. (Optional) Clones Ares emulator for oracle integration.
+#
+# Prereqs: git, python3, cmake, a working C/C++ toolchain.
 
 set -euo pipefail
 
-SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-WORKSPACE_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)
-DECOMP_DIR="$WORKSPACE_ROOT/decomp/pokestadium"
-N64RECOMP_DIR="$WORKSPACE_ROOT/toolchain/N64Recomp"
-RUNTIME_DIR="$WORKSPACE_ROOT/toolchain/N64ModernRuntime"
-RT64_DIR="$WORKSPACE_ROOT/toolchain/rt64"
-UI_DIR="$WORKSPACE_ROOT/toolchain/recomp-ui"
-ARES_DIR="$WORKSPACE_ROOT/toolchain/ares"
+N64RECOMP_REPO="https://github.com/N64Recomp/N64Recomp.git"
+ARES_REPO="https://github.com/ares-emulator/ares.git"
+SISTER_N64RECOMP="../N64Recomp"   # local sister-dir checkout, if present
 
-require_repo() {
-    if [ ! -e "$1/.git" ]; then
-        echo "Error: required workspace repository is missing: $1" >&2
-        echo "Run 'git submodule update --init --recursive' from $WORKSPACE_ROOT." >&2
-        exit 1
-    fi
-}
-
-for dependency in "$DECOMP_DIR" "$N64RECOMP_DIR" "$RUNTIME_DIR" "$RT64_DIR" "$UI_DIR"; do
-    require_repo "$dependency"
-done
-
-SHA=$(sed -n 's/^[[:space:]]*sha[[:space:]]*=[[:space:]]*//p' "$SCRIPT_DIR/n64recomp.pin" | tr -d '[:space:]')
+# ---- Parse SHA from n64recomp.pin ----
+SHA=$(sed -n 's/^[[:space:]]*sha[[:space:]]*=[[:space:]]*//p' n64recomp.pin | tr -d '[:space:]')
 if [ -z "$SHA" ]; then
     echo "Error: no sha found in n64recomp.pin" >&2
     exit 1
 fi
 
-ACTUAL=$(git -C "$N64RECOMP_DIR" rev-parse HEAD)
+# ---- Provision n64recomp/ ----
+if [ ! -e "n64recomp" ]; then
+    if [ -d "$SISTER_N64RECOMP/.git" ]; then
+        echo "Linking n64recomp/ -> $SISTER_N64RECOMP (sister checkout)..."
+        ln -s "$SISTER_N64RECOMP" n64recomp
+    else
+        echo "Cloning N64Recomp..."
+        git clone --recurse-submodules "$N64RECOMP_REPO" n64recomp
+    fi
+fi
+
+# ---- Pin enforcement ----
+ACTUAL=$(git -C n64recomp rev-parse HEAD)
 if [ "$ACTUAL" != "$SHA" ]; then
-    echo "Note: N64Recomp HEAD ($ACTUAL) differs from the game pin ($SHA)."
+    echo "Note: n64recomp HEAD ($ACTUAL) != pinned ($SHA)."
+    echo "  To align: git -C n64recomp checkout $SHA"
+    echo "  To roll forward: edit n64recomp.pin to sha = $ACTUAL"
 fi
 
-ROM_PATH="$DECOMP_DIR/baseroms/us/baserom.z64"
+# ---- Disasm submodule ----
+git submodule update --init --recursive disasm
+
+# ---- Stage ROM into disasm ----
+if [ -f "baserom.z64" ] && [ ! -f "disasm/baseroms/us/baserom.z64" ]; then
+    mkdir -p disasm/baseroms/us
+    cp baserom.z64 disasm/baseroms/us/baserom.z64
+    echo "Staged baserom.z64 -> disasm/baseroms/us/"
+fi
+
+# Verify against pret's expected hash
 EXPECTED_MD5="ed1378bc12115f71209a77844965ba50"
-if [ -f "$ROM_PATH" ]; then
-    if command -v md5sum >/dev/null 2>&1; then
-        ACTUAL_MD5=$(md5sum "$ROM_PATH" | awk '{print $1}')
-    else
-        ACTUAL_MD5=$(md5 -q "$ROM_PATH")
-    fi
+if [ -f "disasm/baseroms/us/baserom.z64" ]; then
+    ACTUAL_MD5=$(md5sum "disasm/baseroms/us/baserom.z64" | awk '{print $1}')
     if [ "$ACTUAL_MD5" != "$EXPECTED_MD5" ]; then
-        echo "Warning: Stadium 1 baserom MD5 is $ACTUAL_MD5; expected $EXPECTED_MD5." >&2
+        echo "WARNING: baserom MD5 mismatch."
+        echo "  expected: $EXPECTED_MD5  (US v1.0)"
+        echo "  actual:   $ACTUAL_MD5"
+        echo "  This is likely a different revision (Rev A = v1.1 will not work)."
     else
-        echo "Stadium 1 baserom MD5 OK."
+        echo "baserom MD5 OK ($EXPECTED_MD5)"
     fi
-else
-    echo "Note: place your legal Stadium 1 US v1.0 ROM at $ROM_PATH"
 fi
 
+# ---- Ares oracle (optional, opt-in) ----
 if [ "${WITH_ARES:-0}" = "1" ]; then
-    require_repo "$ARES_DIR"
+    if [ ! -d "ares-emulator/.git" ]; then
+        echo "Cloning Ares (this is a large repo)..."
+        git clone "$ARES_REPO" ares-emulator
+    fi
 fi
 
 echo
-echo "Workspace dependencies are available."
-echo "  pokestadium: $(git -C "$DECOMP_DIR" rev-parse --short HEAD)"
-echo "  N64Recomp:   $(git -C "$N64RECOMP_DIR" rev-parse --short HEAD)"
+echo "Setup complete."
+echo "  n64recomp/   $(git -C n64recomp rev-parse --short HEAD 2>/dev/null || echo '?')"
+echo "  disasm/      $(git -C disasm rev-parse --short HEAD 2>/dev/null || echo '?')"
 echo
-echo "Build the disassembly from: $DECOMP_DIR"
-echo "Configure the game from the workspace root:"
-echo "  cmake -S games/PokemonStadiumRecomp -B build/games/stadium1"
+echo "Next:"
+echo "  1. cd disasm && make init && make"
+echo "  2. (back at root) configure CMake: cmake -S . -B build"
+echo "  3. See ghidra/instructions.txt for analysis setup."

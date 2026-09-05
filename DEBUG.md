@@ -36,7 +36,7 @@ Always find the **first** divergence, not a downstream symptom.
 When the recompiled build misbehaves:
 
 1. **Does the disasm build?** If not, the issue is upstream of us
-   — fix in `../../decomp/pokestadium/` or upstream PR. Don't paper over.
+   — fix in `disasm/` or upstream PR. Don't paper over.
 2. **Does N64Recomp regen succeed without warnings?** Warnings
    from N64Recomp about unhandled relocations, missing symbols,
    or branch-target oddities are leading indicators.

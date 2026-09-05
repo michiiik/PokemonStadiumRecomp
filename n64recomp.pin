@@ -1,9 +1,76 @@
-# Exact N64Recomp revision used by this game.
+# Pin file for the N64Recomp engine checkout.
 #
-# The workspace setup script compares toolchain/N64Recomp HEAD with this pin.
-# Update the SHA deliberately when rolling the engine forward, then rebuild and
-# validate the game before committing the new value.
+# CMake's configure step asserts that n64recomp/ HEAD matches what's
+# pinned here. To roll forward, edit this file.
 #
-# Repository: https://github.com/michiiik/N64Recomp
+# Two optional fields:
+#   branch = <ref>   default origin/main, used when sha is unset
+#   sha    = <sha>   exact pin, takes precedence over branch when set
 
+# ── Pinned to mstan/N64Recomp dev ─────────────────────────────────
+# Active development happens on the `dev` branch of mstan/N64Recomp.
+# Each stable point gets pinned by SHA so PSR builds are reproducible.
+# To roll forward to a newer engine commit: bump the sha below.
+# To track the dev tip during active iteration: comment out the sha
+# line and set `branch = dev` instead.
+# ── Rolled to N64Recomp main tip (audio-crackle work base) ──────
+# 2b949c5 = current engine main: the re-authored history line
+#   (de6f18b docs / 790dded license) plus additive ares-oracle cosim
+#   hooks. Ancestor 0dc2a0a (previous pin, tcc overlay backend) is
+#   contained. Base for the work/audio-crackle RSPRecomp investigation;
+#   engine-side audio fixes land on work/audio-crackle off this tip.
 sha = 2b949c5c3f1c41dd76023e7626a6302a4a262a8a
+# --- previous pin ---
+# 0dc2a0a "tcc overlay backend" — carries the in-process libtcc overlay
+#   JIT (replaces sljit) and the tcc_recompiler.h that N64ModernRuntime
+#   main's overlay tier requires. GB Tower R/B/Y user-verified on this pin.
+# 9483814 "Dispatch-entry reject: default arm signals unhandled, not prologue
+#   fall-through" — current N64Recomp main; the GB-mode dispatch-entry interp
+#   self-heal. This `work/github-issues` worktree builds against the engine
+#   worktree at N64Recomp-issues (same sha). Rolled forward from 233b4d8 below.
+# 233b4d8 "Register interior computed-call entry points as dispatch aliases" —
+#   the runtime-overlay-discovery engine, promoted to N64Recomp main 2026-06-18.
+#   Pokemon Stadium was rebuilt + USER-VERIFIED fully functional against this
+#   engine this session (SS Anne launcher + gameplay; only pre-existing crackly
+#   audio). Carries the interior computed-call dispatch-alias pass + the
+#   self-healing fragment-discovery work. NOTE: the v0.4.0-beta RELEASE binary
+#   was built against 62a4754 (below); re-release against this sha to keep the
+#   GPL source-correspondence exact.
+# 62a4754 "docs: drop references to private methodology notes in comments" —
+#   the engine commit the v0.4.0-beta release binary was built against;
+#   comment-only changes on top of 25ecf9f below.
+# 25ecf9f "fix(recompiler): depth-bounded tailcall draining — fix GB Tower
+#   crash without regressing register-quit" — USER-VERIFIED milestone fixing
+#   BOTH ISSUES #11 (GB Tower crash on cart launch) and #7 (register-quit
+#   softlock) on a single build. tailcall_dispatching is now a nested-
+#   trampoline DEPTH counter; call wrappers drain pending non-local tailcalls
+#   locally below depth 1024 (preserves the shallow finite register-quit
+#   continuation, #7) and bubble up above it (caps the GB Tower emulator's
+#   unbounded constant-SP fetch-decode loop before host-stack overflow, #11).
+#   Builds against N64ModernRuntime 78949d6 (matching depth-counter ++/-- in
+#   recomp_handle_tailcalls). Carries gated PSR_CFDIAG recomp_cf_note
+#   scaffolding (no-op when off) — cleanup owed.
+# 755b13a "fix(recompiler): handle local tailcall continuations" — call
+#   wrappers consume pending tailcall targets that resolve to labels in the
+#   current generated function, while pending non-local tailcalls inside an
+#   existing dispatcher bubble back to that dispatcher instead of recursively
+#   nesting host dispatch loops. Required for GB Tower audio verification;
+#   Red/Yellow/Blue launch and play with audio on PSR dev/clear-issues.
+# 5173e0f "fix(recompiler): reentrant nested tailcall dispatch — resolve
+#   register-quit over-unwind" — USER-VERIFIED fix for ISSUES #7. Call
+#   wrappers no longer bubble up into the outermost dispatch loop; nested
+#   continuations drain their own tailcall chain locally; static-tail
+#   guards (jump-to-own-return → normal return) restored. GB Tower R/B/Y
+#   regression-checked OK. Builds against N64ModernRuntime main 67f3c7c
+#   (reentrant recomp_handle_tailcalls). Includes gated PSR_CFDIAG
+#   recomp_cf_note scaffolding (no-op when off) — cleanup owed.
+# a0aaa1c "feat(recompiler): static-entry seeding + loop-yield + jr-ra
+#   fixes for GB Tower [Codex GB Tower session]" — the engine commit the
+#   GB Tower bring-up was built against (Transfer Pak + GB Tower R/B/Y).
+# 91f05f8 "docs: update fork notice for SS Anne org affiliation" (prior pin)
+#   — docs-only commit; functionally identical to its parent.
+# fad8a9c "recomp: mask host rdram offset in MEM_W/H/B macros" (parent)
+#   turns out-of-range vaddr loads into garbage reads instead of
+#   host SEGVs — matches N64 silent-wrap; rescued the Register
+#   Pokemon screen from a recurring audio-UAF host crash. Still the
+#   newest *functional* engine change; 91f05f8 only adds docs on top.

@@ -32,15 +32,13 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-ELF = Path(__file__).resolve().parents[3] / "decomp" / "pokestadium" / "build" / "pokestadium-us.elf"
+ELF = Path(__file__).resolve().parent.parent / "disasm" / "build" / "pokestadium-us.elf"
 READELF = "mips-linux-gnu-readelf"  # in WSL
 
 
 def run_readelf():
     """Use WSL to invoke the MIPS readelf and return raw output."""
-    elf_wsl = subprocess.run(
-        ["wsl", "wslpath", "-a", str(ELF)], capture_output=True, text=True, check=True
-    ).stdout.strip()
+    elf_wsl = "/mnt/f/Projects/PokemonStadiumRecomp/disasm/build/pokestadium-us.elf"
     out = subprocess.run(
         ["wsl", "-d", "Ubuntu", "--", "mips-linux-gnu-readelf", "-s", elf_wsl],
         capture_output=True, text=True, check=True,

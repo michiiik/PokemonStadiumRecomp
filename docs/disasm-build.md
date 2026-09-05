@@ -1,13 +1,13 @@
 # Building pret/pokestadium on Windows
 
 The disasm is the upstream of our recomp pipeline — it produces
-`../../decomp/pokestadium/build/pokestadium-us.elf`, which N64Recomp and Ghidra both
+`disasm/build/pokestadium-us.elf`, which N64Recomp and Ghidra both
 consume. Without this ELF, neither pipeline has section addresses
 or symbols.
 
 pret's Makefile is Debian/Ubuntu-shaped: it expects
 `mips-linux-gnu-as`, `mips-linux-gnu-ld`, `make`, `python3`, and
-the Python packages in `../../decomp/pokestadium/requirements.txt`. Native Windows
+the Python packages in `disasm/requirements.txt`. Native Windows
 doesn't ship a MIPS GNU toolchain in any of the usual package
 managers, so you have three options.
 
@@ -46,7 +46,7 @@ md5sum build/pokestadium-us.z64
 # expected: ed1378bc12115f71209a77844965ba50
 ```
 
-The ELF lands at `../../decomp/pokestadium/build/pokestadium-us.elf` — visible from
+The ELF lands at `disasm/build/pokestadium-us.elf` — visible from
 both WSL (`/mnt/f/...`) and the Windows side, so N64Recomp picks it
 up directly.
 
@@ -74,7 +74,7 @@ Build and use:
 docker build -t pokestadium-disasm -f Dockerfile .
 docker run --rm -v "$(pwd):/work" \
   pokestadium-disasm \
-  bash -c "cd ../../decomp/pokestadium && pip install -r requirements.txt && make init && make"
+  bash -c "cd disasm && pip install -r requirements.txt && make init && make"
 ```
 
 ## Option 3 — MSYS2 with msys2-cross-mips (advanced)
@@ -89,16 +89,16 @@ Not recommended unless WSL2 is unavailable for policy reasons.
 ## After a successful build
 
 The build produces:
-- `../../decomp/pokestadium/build/pokestadium-us.z64` — should md5 to
+- `disasm/build/pokestadium-us.z64` — should md5 to
   `ed1378bc12115f71209a77844965ba50`. If it doesn't, the ROM
-  staged at `../../decomp/pokestadium/baseroms/us/baserom.z64` is wrong revision.
-- `../../decomp/pokestadium/build/pokestadium-us.elf` — what we feed N64Recomp.
-- `../../decomp/pokestadium/build/pokestadium-us.map` — linker map, useful for
+  staged at `disasm/baseroms/us/baserom.z64` is wrong revision.
+- `disasm/build/pokestadium-us.elf` — what we feed N64Recomp.
+- `disasm/build/pokestadium-us.map` — linker map, useful for
   Ghidra symbol cross-reference.
-- `../../decomp/pokestadium/build/lib/...` — intermediate libraries; ignore.
+- `disasm/build/lib/...` — intermediate libraries; ignore.
 
 Once the ELF exists, point `game.toml`'s `[input].elf` at it
-(already done — `../../decomp/pokestadium/build/pokestadium-us.elf`) and the
+(already done — `disasm/build/pokestadium-us.elf`) and the
 N64Recomp pipeline can run.
 
 ## Troubleshooting
@@ -112,7 +112,7 @@ N64Recomp pipeline can run.
   --no-build-isolation` if a wheel is unavailable for your Python
   version, or install a pre-built MIPS rabbitizer separately.
 - **`make init` halts on yay0 or jpeg asset** — pret occasionally
-  bumps asset tooling versions. `cd ../../decomp/pokestadium && git pull` to sync.
+  bumps asset tooling versions. `cd disasm && git pull` to sync.
 - **Slow first build** — normal. Asset extraction is one-time.
   `make clean && make` rebuilds in 1–2 minutes on subsequent runs.
 

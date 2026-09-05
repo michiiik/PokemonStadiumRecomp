@@ -1,0 +1,16 @@
+[submodule "disasm"]
+	path = disasm
+	url = https://github.com/michiiik/pokestadium.git
+[submodule "recomp-ui"]
+	path = recomp-ui
+	url = https://github.com/michiiik/recomp-ui.git
+	branch = work/n64-console
+[submodule "n64recomp"]
+	path = n64recomp
+	url = https://github.com/michiiik/N64Recomp.git
+[submodule "lib/N64ModernRuntime"]
+	path = lib/N64ModernRuntime
+	url = https://github.com/michiiik/N64ModernRuntime.git
+[submodule "lib/rt64"]
+	path = lib/rt64
+	url = https://github.com/michiiik/rt64.git
