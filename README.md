@@ -287,30 +287,37 @@ to a bug report.
 | Format | `.z64` (big-endian native, magic `80 37 12 40`) |
 
 **Rev A (v1.1) is not compatible** — pret's disassembly targets v1.0
-specifically, and the address tables in `disasm/yamls/us/rom.yaml`
+specifically, and the address tables in `../../decomp/pokestadium/yamls/us/rom.yaml`
 will not align with a Rev A binary. If you have Rev A, find a v1.0
 dump.
 
 ## Layout
 
 ```
-PokemonStadiumRecomp/
-├── baserom.z64                     # canonical ROM (gitignored)
-├── disasm/                         # pret/pokestadium submodule
-├── n64recomp/                      # N64Recomp engine (junction by setup)
-├── ares-bridge/                    # Ares oracle integration (TODO subproject)
-├── ghidra/                         # Ghidra project + instructions
-├── generated/                      # recompiler C output (gitignored)
-├── tools/                          # game-specific tooling
-├── tests/                          # regression tests
-├── docs/                           # design notes
-├── game.toml                       # N64Recomp config
-├── n64recomp.pin                   # engine SHA pin
-├── CMakeLists.txt                  # build entrypoint
-├── setup.sh / setup.bat            # provisioning
-├── DEBUG.md                        # divergence triage protocol
-├── ISSUES.md / MODDING.md
-└── README.md
+PokemonStadiumWorkspace/
+├── decomp/
+│   └── pokestadium/                # michiiik/pokestadium fork
+├── games/
+│   └── PokemonStadiumRecomp/       # this repository
+└── toolchain/
+    ├── N64Recomp/
+    ├── N64ModernRuntime/
+    ├── rt64/
+    ├── recomp-ui/
+    └── ares/
+```
+
+The game repository contains project-specific source and configuration. The
+disassembly and shared runtime/toolchain repositories remain independent
+sibling repositories, managed by an umbrella workspace.
+
+Inside this repository, the important inputs are:
+
+```
+game.toml            # reads ../../decomp/pokestadium/build/pokestadium-us.elf
+n64recomp.pin        # expected N64Recomp revision
+CMakeLists.txt       # consumes dependencies from ../../toolchain
+setup.sh / setup.bat # verifies the workspace layout; does not clone duplicates
 ```
 
 ## Quick start
@@ -320,25 +327,71 @@ the disasm build (optional): `make`, `binutils-mips-linux-gnu`.
 
 ```bash
 # Linux / macOS
-chmod +x setup.sh && ./setup.sh
+games/PokemonStadiumRecomp/setup.sh
 
 # Windows
-setup.bat
+games\PokemonStadiumRecomp\setup.bat
 ```
 
 This:
-1. Clones (or junctions) `n64recomp/` at the SHA pinned in
-   `n64recomp.pin`.
-2. Initializes the `disasm/` submodule (pret/pokestadium).
-3. Stages `baserom.z64` into `disasm/baseroms/us/`.
+1. Verifies the sibling decompilation and toolchain repositories.
+2. Checks the shared N64Recomp checkout against `n64recomp.pin`.
+3. Reports the canonical ROM and build paths without copying dependencies.
 
-Optional: clone the Ares oracle with `WITH_ARES=1 ./setup.sh`. See
+## Workspace builds
+
+The current build layout keeps shared dependencies in public Git submodules at
+the workspace root. Run the commands below from the workspace root (the
+directory containing `games/` and `toolchain/`). ROMs, saves, binaries, and
+build directories remain local and are excluded from Git. A standalone clone
+of this game repository must provide the same dependency checkouts at those
+paths, or adapt the CMake dependency paths for its own layout.
+
+### Windows
+
+Install Git, CMake 3.22 or newer, Ninja, and a supported C/C++ compiler
+(Visual Studio 2022 or Clang on Windows). Initialize the workspace
+dependencies, then configure and build:
+
+```powershell
+git submodule update --init --recursive
+cmake -S games/PokemonStadiumRecomp -B build/games/stadium1 -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build/games/stadium1 --target PokemonStadiumRecomp --parallel 2
+```
+
+The executable is written below `build\games\stadium1`. The clean checkout
+must first contain the generated C sources in `generated\`; the script reports
+an actionable error if they have not yet been transferred or regenerated.
+
+### Android
+
+Stadium 1 does not currently have an Android application target in this
+workspace. The root Android script currently builds the Stadium 2 Android
+project only.
+
+### macOS
+
+After the Stadium 1 generated sources are present, install Xcode Command Line
+Tools, Git, CMake, Ninja, and the Vulkan SDK. Configure it with the native
+macOS compiler and Ninja:
+
+```bash
+git submodule update --init --recursive
+cmake -S games/PokemonStadiumRecomp -B build/macos/stadium1 -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build/macos/stadium1 --target PokemonStadiumRecomp --parallel 2
+```
+
+The macOS build requires a compatible C/C++ compiler, CMake, Ninja, Vulkan,
+and the platform libraries used by RT64. Supply a legally obtained Stadium 1
+ROM at launch; ROMs and saves must not be committed.
+
+Optional: set `WITH_ARES=1` when running `setup.sh` to require the workspace Ares checkout. See
 the *Oracle* section below — the bridge code is not yet written.
 
 To build the disasm (sanity check that the ROM and pret align):
 
 ```bash
-cd disasm
+cd ../../decomp/pokestadium
 make init     # extracts assets from the staged baserom
 make          # rebuilds an identical pokestadium-us.z64 from sources
 ```
@@ -377,7 +430,7 @@ own legal dumps.
 ## Pipeline overview
 
 ```
-disasm/  +  baserom.z64    -->  pret build      -->  pokestadium-us.elf
+../../decomp/pokestadium/ + baserom.z64    -->  pret build      -->  pokestadium-us.elf
                                   (make init && make)         |
                                                               v
                           game.toml  +  N64RecompCLI  -->  generated/*.c
@@ -398,7 +451,7 @@ imports the ELF directly (see `ghidra/instructions.txt`).
 
 Pokémon Stadium has a flat 8 MB virtual address space and uses
 DMA-loaded *fragments* (overlays). Verified from
-`disasm/yamls/us/rom.yaml`:
+`../../decomp/pokestadium/yamls/us/rom.yaml`:
 
 - 77 numbered fragments at **mostly unique VRAM addresses**
   (`0x81200000`, `0x87800000`, `0x87900000`, `0x8F000000`, …).

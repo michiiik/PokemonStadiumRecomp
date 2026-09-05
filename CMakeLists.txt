@@ -10,12 +10,21 @@ endif()
 
 project(PokemonStadiumRecomp C CXX)
 
+# This game uses the shared sibling workspace layout. Shared dependencies
+# are kept in workspace submodules rather than old per-game lib directories.
+get_filename_component(PSR_WORKSPACE_ROOT "${CMAKE_SOURCE_DIR}/../.." ABSOLUTE)
+set(PSR_TOOLCHAIN_ROOT "${PSR_WORKSPACE_ROOT}/toolchain")
+
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything /W4")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything /W4")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -Wall")
+    endif()
 endif()
 if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR")
@@ -68,7 +77,7 @@ endif()
 set(RT64_STATIC TRUE)
 set(RT64_SDL_WINDOW_VULKAN TRUE)
 add_compile_definitions(HLSL_CPU)
-add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/rt64)
+add_subdirectory(${PSR_TOOLCHAIN_ROOT}/rt64 ${CMAKE_BINARY_DIR}/rt64)
 
 # ---- UI framework: shared recomp-ui pre-boot ImGui launcher -----------------
 # The launcher is wired into the runner target below via
@@ -76,8 +85,8 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/rt64)
 # vendored RmlUi + lunasvg overlay. Keep static linkage for the engine subdirs.
 set(BUILD_SHARED_LIBS OFF)
 
-# ---- N64ModernRuntime (junctioned at lib/N64ModernRuntime) -----------------
-set(N64MODERN_RUNTIME_ROOT "${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime" CACHE PATH
+# ---- N64ModernRuntime (workspace submodule) --------------------------------
+set(N64MODERN_RUNTIME_ROOT "${PSR_TOOLCHAIN_ROOT}/N64ModernRuntime" CACHE PATH
     "Path to the N64ModernRuntime checkout used by this game")
 add_subdirectory(${N64MODERN_RUNTIME_ROOT} ${CMAKE_BINARY_DIR}/lib/N64ModernRuntime)
 
@@ -176,14 +185,13 @@ target_include_directories(PokemonStadiumRecomp PRIVATE
     ${N64MODERN_RUNTIME_ROOT}/ultramodern/include
     ${N64MODERN_RUNTIME_ROOT}/librecomp/include
     ${N64MODERN_RUNTIME_ROOT}/N64Recomp/include
-    ${CMAKE_SOURCE_DIR}/lib/concurrentqueue
-    ${CMAKE_SOURCE_DIR}/lib/SlotMap
-    ${CMAKE_SOURCE_DIR}/lib/rt64/src
-    ${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib
-    ${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/hlslpp/include
-    ${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/dxc/inc
-    ${CMAKE_SOURCE_DIR}/lib/rt64/src/rhi
-    ${CMAKE_SOURCE_DIR}/lib/rt64/src/render
+    ${N64MODERN_RUNTIME_ROOT}/thirdparty/concurrentqueue
+    ${PSR_TOOLCHAIN_ROOT}/rt64/src
+    ${PSR_TOOLCHAIN_ROOT}/rt64/src/contrib
+    ${PSR_TOOLCHAIN_ROOT}/rt64/src/contrib/hlslpp/include
+    ${PSR_TOOLCHAIN_ROOT}/rt64/src/contrib/dxc/inc
+    ${PSR_TOOLCHAIN_ROOT}/rt64/src/rhi
+    ${PSR_TOOLCHAIN_ROOT}/rt64/src/render
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -242,8 +250,8 @@ if (WIN32)
     add_custom_command(TARGET PokemonStadiumRecomp POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${sdl2_SOURCE_DIR}/lib/x64/SDL2.dll"
-            "${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxil.dll"
-            "${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxcompiler.dll"
+            "${PSR_TOOLCHAIN_ROOT}/rt64/src/contrib/dxc/bin/x64/dxil.dll"
+            "${PSR_TOOLCHAIN_ROOT}/rt64/src/contrib/dxc/bin/x64/dxcompiler.dll"
             $<TARGET_FILE_DIR:PokemonStadiumRecomp>
     )
 
@@ -308,12 +316,12 @@ target_include_directories(PokemonStadiumRecomp PRIVATE
 # that one backend here, against rt64's (1.90.x) ImGui, matching its core.
 set(RECOMP_UI_HOST_IMGUI ON)
 set(RECOMP_UI_HOST_IMGUI_INCLUDE
-    ${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/imgui
-    ${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/imgui/backends)
-include(${CMAKE_CURRENT_SOURCE_DIR}/recomp-ui/recomp_ui.cmake)
+    ${PSR_TOOLCHAIN_ROOT}/rt64/src/contrib/imgui
+    ${PSR_TOOLCHAIN_ROOT}/rt64/src/contrib/imgui/backends)
+include(${PSR_TOOLCHAIN_ROOT}/recomp-ui/recomp_ui.cmake)
 recomp_target_launcher_ui(PokemonStadiumRecomp)
 target_sources(PokemonStadiumRecomp PRIVATE
-    ${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/imgui/backends/imgui_impl_opengl3.cpp)
+    ${PSR_TOOLCHAIN_ROOT}/rt64/src/contrib/imgui/backends/imgui_impl_opengl3.cpp)
 # recomp_target_launcher_ui() pins the target to C++17 (for ImGui); PSR's runner
 # needs C++20 (main.cpp), and ImGui compiles cleanly under 20, so restore it.
 set_target_properties(PokemonStadiumRecomp PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)

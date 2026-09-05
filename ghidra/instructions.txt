@@ -5,12 +5,12 @@ GHIDRA SETUP — PokemonStadiumRecomp
 Goal: import Pokémon Stadium (US v1.0) into Ghidra for analysis.
 
 Recommended workflow: import pret's post-build ELF
-(`disasm/build/pokestadium-us.elf`), which already has every
+(`../../decomp/pokestadium/build/pokestadium-us.elf`), which already has every
 section at its correct load VA plus symbols. This is far simpler
 than importing the raw ROM and reconstructing addresses by hand.
 
 Pokemon Stadium's 77 fragments mostly load at UNIQUE VRAM
-addresses (verified from `disasm/yamls/us/rom.yaml`). Unlike
+addresses (verified from `../../decomp/pokestadium/yamls/us/rom.yaml`). Unlike
 NES bank-switching, you do NOT need to import each fragment as
 its own Ghidra Overlay Memory Block. Almost everything fits in
 one flat address space.
@@ -26,8 +26,8 @@ collisions" at the bottom.
 Prereqs
 -------
 1. Ghidra 11.x or newer (https://ghidra-sre.org/).
-2. The pret disasm built — `cd disasm && make init && make`
-   produces `disasm/build/pokestadium-us.elf`. This requires a
+2. The pret disasm built — `cd ../../decomp/pokestadium && make init && make`
+   produces `../../decomp/pokestadium/build/pokestadium-us.elf`. This requires a
    MIPS toolchain (binutils-mips-linux-gnu) which on Windows
    typically means WSL. See ../docs/disasm-build.md (TODO).
 3. (Optional) The Ghidra-N64 loader extension if you want to
@@ -44,7 +44,7 @@ Project creation
 
 Step 1 — Import the post-build ELF (recommended path)
 -----------------------------------------------------
-File → Import File → select `disasm/build/pokestadium-us.elf`.
+File → Import File → select `../../decomp/pokestadium/build/pokestadium-us.elf`.
 
 Format:           ELF (auto-detected)
 Language:         MIPS:BE:32:default
@@ -67,7 +67,7 @@ ELF section:
 
 If a fragment is missing, it's because the disasm hasn't placed
 that fragment in the linker script yet — check
-`disasm/linker_scripts/us/pokestadium.ld`.
+`../../decomp/pokestadium/linker_scripts/us/pokestadium.ld`.
 
 Step 3 — Re-run with the raw ROM (alternative path)
 ---------------------------------------------------
@@ -123,7 +123,7 @@ Each contributor maintains their own local Ghidra project.
 
 Troubleshooting
 ---------------
-- "Cannot find ELF" → run `make init && make` in disasm/. On
+- "Cannot find ELF" → run `make init && make` in ../../decomp/pokestadium/. On
   Windows you'll need WSL or another MIPS toolchain host.
 - "Bad ROM signature" (raw ROM path) → file is not native
   big-endian z64. Magic must be 80 37 12 40. Run a byteswap

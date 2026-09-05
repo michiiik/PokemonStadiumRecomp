@@ -991,8 +991,8 @@ playable-build issue list above.
       40-char HEAD of `../N64Recomp` after `setup.sh` runs. Currently
       pinned to a placeholder padded with hex.
 - [ ] Verify `setup.sh` and `setup.bat` end-to-end on a clean clone.
-- [ ] First `disasm/make init` + `disasm/make` run — confirm pret
-      builds identically against `disasm/baseroms/us/baserom.z64`.
+- [ ] First `../../decomp/pokestadium/make init` + `../../decomp/pokestadium/make` run — confirm pret
+      builds identically against `../../decomp/pokestadium/baseroms/us/baserom.z64`.
 
 ### Recompilation pipeline (historical phase)
 
@@ -1000,7 +1000,7 @@ playable-build issue list above.
       Requires MIPS binutils + make + python. On Windows this
       means WSL2 — full instructions in `docs/disasm-build.md`.
 - [ ] Wire `game.toml` to point at the produced ELF
-      (`disasm/build/pokestadium-us.elf`).
+      (`../../decomp/pokestadium/build/pokestadium-us.elf`).
 - [ ] First N64Recomp run against the ELF. Expect warnings on
       indirect call sites and unmapped relocations — triage them.
 - [ ] CMake target that invokes `N64RecompCLI` and depends on
@@ -1139,7 +1139,7 @@ playable.
          decimated ≈ 4.0/s.
 
       3. *Why the queue was full (root cause).* The game (standard
-         libultra audio manager, `disasm/src/3D140.c` `func_8003CADC`)
+         libultra audio manager, `../../decomp/pokestadium/src/3D140.c` `func_8003CADC`)
          paces generation by reading `HW_REG(AI_LEN_REG)` — the bytes
          still pending playback — and emitting a SHORT frame
          (`minFrameSize`) when the buffer is full, a full frame

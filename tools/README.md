@@ -23,7 +23,7 @@ in `n64recomp/` (the engine).
 
 - `extract_overlays.py` — was scaffolded under the assumption
   that fragments collide in VRAM the way NES banks share
-  `0x8000-0xFFFF`. Verified from `disasm/yamls/us/rom.yaml`
+  `0x8000-0xFFFF`. Verified from `../../decomp/pokestadium/yamls/us/rom.yaml`
   that they don't (only 2 placeholder collisions out of 77
   fragments). The disasm's ELF carries every section's VA, so
   N64Recomp + Ghidra read it directly. If a real overlay-handling
@@ -31,7 +31,7 @@ in `n64recomp/` (the engine).
 
 ## Ground rules
 
-- Tools here are **read-only against `disasm/`**. Never write to
+- Tools here are **read-only against `../../decomp/pokestadium/`**. Never write to
   the submodule from tooling — only consume its files.
 - Tools that touch `baserom.z64` must verify MD5 first.
 - Tools that emit into gitignored directories (`generated/`,

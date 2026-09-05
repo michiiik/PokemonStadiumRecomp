@@ -1,22 +1,25 @@
 @echo off
-:: PokemonStadiumRecomp setup - Windows
-::
-:: What this does:
-::   1. Clones N64Recomp into n64recomp\ at the SHA pinned in
-::      n64recomp.pin (or junctions to a sister checkout if present).
-::   2. Initializes the disasm submodule (pret/pokestadium).
-::   3. Stages the verified baserom.z64 into disasm\baseroms\us\.
-::   4. (Optional) Clones Ares emulator if WITH_ARES=1.
-
+:: Verify the shared Pokemon Stadium workspace layout.
 setlocal enabledelayedexpansion
 
-set "N64RECOMP_REPO=https://github.com/N64Recomp/N64Recomp.git"
-set "ARES_REPO=https://github.com/ares-emulator/ares.git"
-set "SISTER_N64RECOMP=..\N64Recomp"
+for %%I in ("%~dp0..\..") do set "WORKSPACE_ROOT=%%~fI"
+set "DECOMP_DIR=%WORKSPACE_ROOT%\decomp\pokestadium"
+set "N64RECOMP_DIR=%WORKSPACE_ROOT%\toolchain\N64Recomp"
+set "RUNTIME_DIR=%WORKSPACE_ROOT%\toolchain\N64ModernRuntime"
+set "RT64_DIR=%WORKSPACE_ROOT%\toolchain\rt64"
+set "UI_DIR=%WORKSPACE_ROOT%\toolchain\recomp-ui"
+set "ARES_DIR=%WORKSPACE_ROOT%\toolchain\ares"
 
-:: ---- Parse SHA from n64recomp.pin ----
+for %%D in ("%DECOMP_DIR%" "%N64RECOMP_DIR%" "%RUNTIME_DIR%" "%RT64_DIR%" "%UI_DIR%") do (
+    if not exist "%%~D\.git" (
+        echo Error: required workspace repository is missing: %%~D
+        echo Run git submodule update --init --recursive from %WORKSPACE_ROOT%.
+        exit /b 1
+    )
+)
+
 set "SHA="
-for /f "usebackq tokens=1,* delims==" %%a in ("n64recomp.pin") do (
+for /f "usebackq tokens=1,* delims==" %%a in ("%~dp0n64recomp.pin") do (
     set "key=%%a"
     set "key=!key: =!"
     if "!key!"=="sha" (
@@ -29,50 +32,30 @@ if not defined SHA (
     exit /b 1
 )
 
-:: ---- Provision n64recomp\ ----
-if not exist "n64recomp" (
-    if exist "%SISTER_N64RECOMP%\.git" (
-        echo Junctioning n64recomp -^> %SISTER_N64RECOMP%
-        mklink /J n64recomp %SISTER_N64RECOMP%
-    ) else (
-        echo Cloning N64Recomp...
-        git clone --recurse-submodules %N64RECOMP_REPO% n64recomp
-    )
-)
-
-:: ---- Pin enforcement ----
-for /f %%h in ('git -C n64recomp rev-parse HEAD') do set "ACTUAL=%%h"
+for /f %%h in ('git -C "%N64RECOMP_DIR%" rev-parse HEAD') do set "ACTUAL=%%h"
 if not "!ACTUAL!"=="%SHA%" (
-    echo Note: n64recomp HEAD ^(!ACTUAL!^) != pinned ^(%SHA%^).
-    echo   To align: git -C n64recomp checkout %SHA%
-    echo   To roll forward: edit n64recomp.pin to sha = !ACTUAL!
+    echo Note: N64Recomp HEAD ^(!ACTUAL!^) differs from the game pin ^(%SHA%^).
 )
 
-:: ---- Disasm submodule ----
-git submodule update --init --recursive disasm
-
-:: ---- Stage ROM into disasm ----
-if exist "baserom.z64" (
-    if not exist "disasm\baseroms\us\baserom.z64" (
-        if not exist "disasm\baseroms\us" mkdir "disasm\baseroms\us"
-        copy /Y "baserom.z64" "disasm\baseroms\us\baserom.z64" >nul
-        echo Staged baserom.z64 -^> disasm\baseroms\us\
-    )
+set "ROM_PATH=%DECOMP_DIR%\baseroms\us\baserom.z64"
+if exist "%ROM_PATH%" (
+    echo Stadium 1 baserom found at %ROM_PATH%
+) else (
+    echo Note: place your legal Stadium 1 US v1.0 ROM at %ROM_PATH%
 )
 
-:: ---- Ares oracle (optional, opt-in) ----
-if "%WITH_ARES%"=="1" (
-    if not exist "ares-emulator\.git" (
-        echo Cloning Ares ^(this is a large repo^)...
-        git clone %ARES_REPO% ares-emulator
-    )
+if "%WITH_ARES%"=="1" if not exist "%ARES_DIR%\.git" (
+    echo Error: initialize the workspace Ares submodule at %ARES_DIR%.
+    exit /b 1
 )
 
 echo.
-echo Setup complete.
-echo Next:
-echo   1. cd disasm ^&^& make init ^&^& make
-echo   2. (back at root) cmake -S . -B build -G "Visual Studio 17 2022" -A x64
-echo   3. See ghidra\instructions.txt for analysis setup.
+echo Workspace dependencies are available.
+for /f %%h in ('git -C "%DECOMP_DIR%" rev-parse --short HEAD') do echo   pokestadium: %%h
+for /f %%h in ('git -C "%N64RECOMP_DIR%" rev-parse --short HEAD') do echo   N64Recomp:   %%h
+echo.
+echo Build the disassembly from: %DECOMP_DIR%
+echo Configure the game from the workspace root:
+echo   cmake -S games/PokemonStadiumRecomp -B build/games/stadium1
 
 endlocal
