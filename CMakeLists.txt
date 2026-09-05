@@ -190,8 +190,12 @@ target_include_directories(PokemonStadiumRecomp PRIVATE
 target_compile_options(PokemonStadiumRecomp PRIVATE
     -fno-strict-aliasing
     -fms-extensions
-    -march=nehalem  # Required by RT64's RSP simulator (SSSE3, SSE4.1, SSE4.2)
 )
+if (NOT APPLE)
+    target_compile_options(PokemonStadiumRecomp PRIVATE
+        -march=nehalem  # Required by RT64's RSP simulator (SSSE3, SSE4.1, SSE4.2)
+    )
+endif()
 
 # The runner sources (main.cpp, rt64_render_context.cpp) include RT64's hlslpp
 # via Windows headers; without NOMINMAX the min/max macros break hlslpp's min()/
