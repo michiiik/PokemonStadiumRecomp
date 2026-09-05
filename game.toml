@@ -232,19 +232,19 @@ name = "func_81200000"
 size = 0x8   # vram 0x81200000
 
 [[input.function_sizes]]
-name = "func_812096A0"
+name = "GbCpu_InitOpcodeTables"
 size = 0x1D0   # vram 0x812096A0
 
 [[input.function_sizes]]
-name = "func_81209870"
+name = "GbEmu_InitContext"
 size = 0x5A0   # vram 0x81209870
 
 [[input.function_sizes]]
-name = "func_81209E10"
+name = "GbEmu_DebugPrintf"
 size = 0xA4   # vram 0x81209E10
 
 [[input.function_sizes]]
-name = "func_81209EB4"
+name = "GbCpu_Execute"
 size = 0x640   # vram 0x81209EB4
 
 [[input.function_sizes]]
@@ -296,615 +296,615 @@ name = "func_8120B490"
 size = 0x28   # vram 0x8120B490
 
 [[input.function_sizes]]
-name = "func_8120B4B8"
+name = "GbCpu_ResumeFromSavedState"
 size = 0x20   # vram 0x8120B4B8
 
 [[input.function_sizes]]
-name = "func_8120B4D8"
+name = "GbCpu_HandleReservedOpcode"
 size = 0xC   # vram 0x8120B4D8
 
 [[input.function_sizes]]
-name = "func_8120B4E4"
+name = "GbCpu_DisableInterrupts"
 size = 0x8   # vram 0x8120B4E4
 
 [[input.function_sizes]]
-name = "func_8120B4EC"
+name = "GbCpu_EnableInterrupts"
 size = 0x18   # vram 0x8120B4EC
 
 [[input.function_sizes]]
-name = "func_8120B504"
+name = "GbCpu_Halt"
 size = 0x8   # vram 0x8120B504
 
 [[input.function_sizes]]
-name = "func_8120B50C"
+name = "GbCpu_DispatchCbOpcode"
 size = 0x2C   # vram 0x8120B50C
 
 [[input.function_sizes]]
-name = "func_8120B538"
+name = "GbCpu_PushDe"
 size = 0x10   # vram 0x8120B538
 
 [[input.function_sizes]]
-name = "func_8120B548"
+name = "GbCpu_PushHl"
 size = 0xC   # vram 0x8120B548
 
 [[input.function_sizes]]
-name = "func_8120B554"
+name = "GbCpu_PopBc"
 size = 0x14   # vram 0x8120B554
 
 [[input.function_sizes]]
-name = "func_8120B568"
+name = "GbCpu_PopDe"
 size = 0x14   # vram 0x8120B568
 
 [[input.function_sizes]]
-name = "func_8120B57C"
+name = "GbCpu_PopHl"
 size = 0x10   # vram 0x8120B57C
 
 [[input.function_sizes]]
-name = "func_8120B58C"
+name = "GbCpu_PushAf"
 size = 0x24   # vram 0x8120B58C
 
 [[input.function_sizes]]
-name = "func_8120B5B0"
+name = "GbCpu_PopAf"
 size = 0x24   # vram 0x8120B5B0
 
 [[input.function_sizes]]
-name = "func_8120B5D4"
+name = "GbCpu_LoadImmediateBc"
 size = 0x14   # vram 0x8120B5D4
 
 [[input.function_sizes]]
-name = "func_8120B5E8"
+name = "GbCpu_LoadImmediateDe"
 size = 0x14   # vram 0x8120B5E8
 
 [[input.function_sizes]]
-name = "func_8120B5FC"
+name = "GbCpu_LoadImmediateHl"
 size = 0x10   # vram 0x8120B5FC
 
 [[input.function_sizes]]
-name = "func_8120B60C"
+name = "GbCpu_LoadImmediateSp"
 size = 0x10   # vram 0x8120B60C
 
 [[input.function_sizes]]
-name = "func_8120B61C"
+name = "GbCpu_LoadSpFromHl"
 size = 0x8   # vram 0x8120B61C
 
 [[input.function_sizes]]
-name = "func_8120B624"
+name = "GbCpu_ComplementAccumulator"
 size = 0xC   # vram 0x8120B624
 
 [[input.function_sizes]]
-name = "func_8120B630"
+name = "GbCpu_ReturnIfCarry"
 size = 0x3C   # vram 0x8120B630
 
 [[input.function_sizes]]
-name = "func_8120B66C"
+name = "GbCpu_ReturnEnableInterrupts"
 size = 0x1C   # vram 0x8120B66C
 
 [[input.function_sizes]]
-name = "func_8120B688"
+name = "GbCpu_RestartAtVector"
 size = 0x10   # vram 0x8120B688
 
 [[input.function_sizes]]
-name = "func_8120B698"
+name = "GbCpu_JumpToHl"
 size = 0x8   # vram 0x8120B698
 
 [[input.function_sizes]]
-name = "func_8120B6A0"
+name = "GbCpu_CallAbsoluteIfNotCarry"
 size = 0x64   # vram 0x8120B6A0
 
 [[input.function_sizes]]
-name = "func_8120B704"
+name = "GbCpu_JumpAbsoluteIfNotZero"
 size = 0x18   # vram 0x8120B704
 
 [[input.function_sizes]]
-name = "func_8120B71C"
+name = "GbCpu_JumpAbsoluteIfZero"
 size = 0x18   # vram 0x8120B71C
 
 [[input.function_sizes]]
-name = "func_8120B734"
+name = "GbCpu_JumpAbsoluteIfNotCarry"
 size = 0x18   # vram 0x8120B734
 
 [[input.function_sizes]]
-name = "func_8120B74C"
+name = "GbCpu_JumpAbsoluteIfCarry"
 size = 0x18   # vram 0x8120B74C
 
 [[input.function_sizes]]
-name = "func_8120B764"
+name = "GbCpu_LoadAFromB"
 size = 0x8   # vram 0x8120B764
 
 [[input.function_sizes]]
-name = "func_8120B76C"
+name = "GbCpu_LoadAFromC"
 size = 0x8   # vram 0x8120B76C
 
 [[input.function_sizes]]
-name = "func_8120B774"
+name = "GbCpu_LoadAFromD"
 size = 0x8   # vram 0x8120B774
 
 [[input.function_sizes]]
-name = "func_8120B77C"
+name = "GbCpu_LoadAFromE"
 size = 0x8   # vram 0x8120B77C
 
 [[input.function_sizes]]
-name = "func_8120B784"
+name = "GbCpu_LoadAFromH"
 size = 0x8   # vram 0x8120B784
 
 [[input.function_sizes]]
-name = "func_8120B78C"
+name = "GbCpu_LoadAFromL"
 size = 0x8   # vram 0x8120B78C
 
 [[input.function_sizes]]
-name = "func_8120B794"
+name = "GbCpu_LoadBFromA"
 size = 0x8   # vram 0x8120B794
 
 [[input.function_sizes]]
-name = "func_8120B79C"
+name = "GbCpu_LoadBFromC"
 size = 0x8   # vram 0x8120B79C
 
 [[input.function_sizes]]
-name = "func_8120B7A4"
+name = "GbCpu_LoadBFromD"
 size = 0x8   # vram 0x8120B7A4
 
 [[input.function_sizes]]
-name = "func_8120B7AC"
+name = "GbCpu_LoadBFromE"
 size = 0x8   # vram 0x8120B7AC
 
 [[input.function_sizes]]
-name = "func_8120B7B4"
+name = "GbCpu_LoadBFromH"
 size = 0x8   # vram 0x8120B7B4
 
 [[input.function_sizes]]
-name = "func_8120B7BC"
+name = "GbCpu_LoadBFromL"
 size = 0x8   # vram 0x8120B7BC
 
 [[input.function_sizes]]
-name = "func_8120B7C4"
+name = "GbCpu_LoadCFromA"
 size = 0x8   # vram 0x8120B7C4
 
 [[input.function_sizes]]
-name = "func_8120B7CC"
+name = "GbCpu_LoadCFromB"
 size = 0x8   # vram 0x8120B7CC
 
 [[input.function_sizes]]
-name = "func_8120B7D4"
+name = "GbCpu_LoadCFromD"
 size = 0x8   # vram 0x8120B7D4
 
 [[input.function_sizes]]
-name = "func_8120B7DC"
+name = "GbCpu_LoadCFromE"
 size = 0x8   # vram 0x8120B7DC
 
 [[input.function_sizes]]
-name = "func_8120B7E4"
+name = "GbCpu_LoadCFromH"
 size = 0x8   # vram 0x8120B7E4
 
 [[input.function_sizes]]
-name = "func_8120B7EC"
+name = "GbCpu_LoadCFromL"
 size = 0x8   # vram 0x8120B7EC
 
 [[input.function_sizes]]
-name = "func_8120B7F4"
+name = "GbCpu_LoadDFromA"
 size = 0x8   # vram 0x8120B7F4
 
 [[input.function_sizes]]
-name = "func_8120B7FC"
+name = "GbCpu_LoadDFromB"
 size = 0x8   # vram 0x8120B7FC
 
 [[input.function_sizes]]
-name = "func_8120B804"
+name = "GbCpu_LoadDFromC"
 size = 0x8   # vram 0x8120B804
 
 [[input.function_sizes]]
-name = "func_8120B80C"
+name = "GbCpu_LoadDFromE"
 size = 0x8   # vram 0x8120B80C
 
 [[input.function_sizes]]
-name = "func_8120B814"
+name = "GbCpu_LoadDFromH"
 size = 0x8   # vram 0x8120B814
 
 [[input.function_sizes]]
-name = "func_8120B81C"
+name = "GbCpu_LoadDFromL"
 size = 0x8   # vram 0x8120B81C
 
 [[input.function_sizes]]
-name = "func_8120B824"
+name = "GbCpu_LoadEFromA"
 size = 0x8   # vram 0x8120B824
 
 [[input.function_sizes]]
-name = "func_8120B82C"
+name = "GbCpu_LoadEFromB"
 size = 0x8   # vram 0x8120B82C
 
 [[input.function_sizes]]
-name = "func_8120B834"
+name = "GbCpu_LoadEFromC"
 size = 0x8   # vram 0x8120B834
 
 [[input.function_sizes]]
-name = "func_8120B83C"
+name = "GbCpu_LoadEFromD"
 size = 0x8   # vram 0x8120B83C
 
 [[input.function_sizes]]
-name = "func_8120B844"
+name = "GbCpu_LoadEFromH"
 size = 0x8   # vram 0x8120B844
 
 [[input.function_sizes]]
-name = "func_8120B84C"
+name = "GbCpu_LoadEFromL"
 size = 0x8   # vram 0x8120B84C
 
 [[input.function_sizes]]
-name = "func_8120B854"
+name = "GbCpu_LoadHFromA"
 size = 0x10   # vram 0x8120B854
 
 [[input.function_sizes]]
-name = "func_8120B864"
+name = "GbCpu_LoadHFromB"
 size = 0x10   # vram 0x8120B864
 
 [[input.function_sizes]]
-name = "func_8120B874"
+name = "GbCpu_LoadHFromC"
 size = 0x10   # vram 0x8120B874
 
 [[input.function_sizes]]
-name = "func_8120B884"
+name = "GbCpu_LoadHFromD"
 size = 0x10   # vram 0x8120B884
 
 [[input.function_sizes]]
-name = "func_8120B894"
+name = "GbCpu_LoadHFromE"
 size = 0x10   # vram 0x8120B894
 
 [[input.function_sizes]]
-name = "func_8120B8A4"
+name = "GbCpu_LoadHFromL"
 size = 0x10   # vram 0x8120B8A4
 
 [[input.function_sizes]]
-name = "func_8120B8B4"
+name = "GbCpu_LoadLFromA"
 size = 0xC   # vram 0x8120B8B4
 
 [[input.function_sizes]]
-name = "func_8120B8C0"
+name = "GbCpu_LoadLFromB"
 size = 0xC   # vram 0x8120B8C0
 
 [[input.function_sizes]]
-name = "func_8120B8CC"
+name = "GbCpu_LoadLFromC"
 size = 0xC   # vram 0x8120B8CC
 
 [[input.function_sizes]]
-name = "func_8120B8D8"
+name = "GbCpu_LoadLFromD"
 size = 0xC   # vram 0x8120B8D8
 
 [[input.function_sizes]]
-name = "func_8120B8E4"
+name = "GbCpu_LoadLFromE"
 size = 0xC   # vram 0x8120B8E4
 
 [[input.function_sizes]]
-name = "func_8120B8F0"
+name = "GbCpu_LoadLFromH"
 size = 0x10   # vram 0x8120B8F0
 
 [[input.function_sizes]]
-name = "func_8120B900"
+name = "GbCpu_XorAccumulator"
 size = 0xC   # vram 0x8120B900
 
 [[input.function_sizes]]
-name = "func_8120B90C"
+name = "GbCpu_XorAFromB"
 size = 0xC   # vram 0x8120B90C
 
 [[input.function_sizes]]
-name = "func_8120B918"
+name = "GbCpu_XorAFromC"
 size = 0xC   # vram 0x8120B918
 
 [[input.function_sizes]]
-name = "func_8120B924"
+name = "GbCpu_XorAFromD"
 size = 0xC   # vram 0x8120B924
 
 [[input.function_sizes]]
-name = "func_8120B930"
+name = "GbCpu_XorAFromE"
 size = 0xC   # vram 0x8120B930
 
 [[input.function_sizes]]
-name = "func_8120B93C"
+name = "GbCpu_XorAFromH"
 size = 0x10   # vram 0x8120B93C
 
 [[input.function_sizes]]
-name = "func_8120B94C"
+name = "GbCpu_XorAFromL"
 size = 0x10   # vram 0x8120B94C
 
 [[input.function_sizes]]
-name = "func_8120B95C"
+name = "GbCpu_XorAFromHl"
 size = 0x14   # vram 0x8120B95C
 
 [[input.function_sizes]]
-name = "func_8120B970"
+name = "GbCpu_XorImmediate"
 size = 0x14   # vram 0x8120B970
 
 [[input.function_sizes]]
-name = "func_8120B984"
+name = "GbCpu_OrAB"
 size = 0xC   # vram 0x8120B984
 
 [[input.function_sizes]]
-name = "func_8120B990"
+name = "GbCpu_OrAFromC"
 size = 0xC   # vram 0x8120B990
 
 [[input.function_sizes]]
-name = "func_8120B99C"
+name = "GbCpu_OrAFromD"
 size = 0xC   # vram 0x8120B99C
 
 [[input.function_sizes]]
-name = "func_8120B9A8"
+name = "GbCpu_OrAFromE"
 size = 0xC   # vram 0x8120B9A8
 
 [[input.function_sizes]]
-name = "func_8120B9B4"
+name = "GbCpu_OrAFromH"
 size = 0x10   # vram 0x8120B9B4
 
 [[input.function_sizes]]
-name = "func_8120B9C4"
+name = "GbCpu_OrAFromL"
 size = 0x10   # vram 0x8120B9C4
 
 [[input.function_sizes]]
-name = "func_8120B9D4"
+name = "GbCpu_OrAFromHl"
 size = 0x14   # vram 0x8120B9D4
 
 [[input.function_sizes]]
-name = "func_8120B9E8"
+name = "GbCpu_OrImmediate"
 size = 0x14   # vram 0x8120B9E8
 
 [[input.function_sizes]]
-name = "func_8120B9FC"
+name = "GbCpu_AndAB"
 size = 0xC   # vram 0x8120B9FC
 
 [[input.function_sizes]]
-name = "func_8120BA08"
+name = "GbCpu_AndAFromC"
 size = 0xC   # vram 0x8120BA08
 
 [[input.function_sizes]]
-name = "func_8120BA14"
+name = "GbCpu_AndAFromD"
 size = 0xC   # vram 0x8120BA14
 
 [[input.function_sizes]]
-name = "func_8120BA20"
+name = "GbCpu_AndAFromE"
 size = 0xC   # vram 0x8120BA20
 
 [[input.function_sizes]]
-name = "func_8120BA2C"
+name = "GbCpu_AndAFromH"
 size = 0x10   # vram 0x8120BA2C
 
 [[input.function_sizes]]
-name = "func_8120BA3C"
+name = "GbCpu_AndAFromL"
 size = 0x10   # vram 0x8120BA3C
 
 [[input.function_sizes]]
-name = "func_8120BA4C"
+name = "GbCpu_AndAFromHl"
 size = 0x14   # vram 0x8120BA4C
 
 [[input.function_sizes]]
-name = "func_8120BA60"
+name = "GbCpu_AndImmediate"
 size = 0x14   # vram 0x8120BA60
 
 [[input.function_sizes]]
-name = "func_8120BA74"
+name = "GbCpu_IncrementAtHl"
 size = 0x30   # vram 0x8120BA74
 
 [[input.function_sizes]]
-name = "func_8120BAA4"
+name = "GbCpu_IncrementB"
 size = 0x84   # vram 0x8120BAA4
 
 [[input.function_sizes]]
-name = "func_8120BB28"
+name = "GbCpu_DecrementBc"
 size = 0x18   # vram 0x8120BB28
 
 [[input.function_sizes]]
-name = "func_8120BB40"
+name = "GbCpu_DecrementDe"
 size = 0x18   # vram 0x8120BB40
 
 [[input.function_sizes]]
-name = "func_8120BB58"
+name = "GbCpu_DecrementHl"
 size = 0xC   # vram 0x8120BB58
 
 [[input.function_sizes]]
-name = "func_8120BB64"
+name = "GbCpu_DecrementSp"
 size = 0xC   # vram 0x8120BB64
 
 [[input.function_sizes]]
-name = "func_8120BB70"
+name = "GbCpu_IncrementBc"
 size = 0x18   # vram 0x8120BB70
 
 [[input.function_sizes]]
-name = "func_8120BB88"
+name = "GbCpu_IncrementDe"
 size = 0x18   # vram 0x8120BB88
 
 [[input.function_sizes]]
-name = "func_8120BBA0"
+name = "GbCpu_IncrementHl"
 size = 0xC   # vram 0x8120BBA0
 
 [[input.function_sizes]]
-name = "func_8120BBAC"
+name = "GbCpu_IncrementSp"
 size = 0xC   # vram 0x8120BBAC
 
 [[input.function_sizes]]
-name = "func_8120BBB8"
+name = "GbCpu_DecrementAtHl"
 size = 0x34   # vram 0x8120BBB8
 
 [[input.function_sizes]]
-name = "func_8120BBEC"
+name = "GbCpu_DecrementA"
 size = 0x88   # vram 0x8120BBEC
 
 [[input.function_sizes]]
-name = "func_8120BC74"
+name = "GbCpu_StoreAAtBc"
 size = 0xC   # vram 0x8120BC74
 
 [[input.function_sizes]]
-name = "func_8120BC80"
+name = "GbCpu_StoreAAtDe"
 size = 0xC   # vram 0x8120BC80
 
 [[input.function_sizes]]
-name = "func_8120BC8C"
+name = "GbCpu_StoreBAtHl"
 size = 0xC   # vram 0x8120BC8C
 
 [[input.function_sizes]]
-name = "func_8120BC98"
+name = "GbCpu_StoreCAtHl"
 size = 0xC   # vram 0x8120BC98
 
 [[input.function_sizes]]
-name = "func_8120BCA4"
+name = "GbCpu_StoreDAtHl"
 size = 0xC   # vram 0x8120BCA4
 
 [[input.function_sizes]]
-name = "func_8120BCB0"
+name = "GbCpu_StoreEAtHl"
 size = 0xC   # vram 0x8120BCB0
 
 [[input.function_sizes]]
-name = "func_8120BCBC"
+name = "GbCpu_StoreHAtHl"
 size = 0xC   # vram 0x8120BCBC
 
 [[input.function_sizes]]
-name = "func_8120BCC8"
+name = "GbCpu_StoreLAtHl"
 size = 0xC   # vram 0x8120BCC8
 
 [[input.function_sizes]]
-name = "func_8120BCD4"
+name = "GbCpu_StoreAAtHl"
 size = 0x8   # vram 0x8120BCD4
 
 [[input.function_sizes]]
-name = "func_8120BCDC"
+name = "GbCpu_StoreAAtHlIncrement"
 size = 0x10   # vram 0x8120BCDC
 
 [[input.function_sizes]]
-name = "func_8120BCEC"
+name = "GbCpu_StoreAAtHlDecrement"
 size = 0x10   # vram 0x8120BCEC
 
 [[input.function_sizes]]
-name = "func_8120BCFC"
+name = "GbCpu_StoreAAtHighIoC"
 size = 0x8   # vram 0x8120BCFC
 
 [[input.function_sizes]]
-name = "func_8120BD04"
+name = "GbCpu_StoreAAtHighIoFromImmediate"
 size = 0x10   # vram 0x8120BD04
 
 [[input.function_sizes]]
-name = "func_8120BD14"
+name = "GbCpu_LoadAFromHighIoImmediate"
 size = 0x14   # vram 0x8120BD14
 
 [[input.function_sizes]]
-name = "func_8120BD28"
+name = "GbCpu_LoadAFromHighIoC"
 size = 0xC   # vram 0x8120BD28
 
 [[input.function_sizes]]
-name = "func_8120BD34"
+name = "GbCpu_JumpRelative"
 size = 0x14   # vram 0x8120BD34
 
 [[input.function_sizes]]
-name = "func_8120BD48"
+name = "GbCpu_JumpRelativeIfNotZero"
 size = 0x18   # vram 0x8120BD48
 
 [[input.function_sizes]]
-name = "func_8120BD60"
+name = "GbCpu_JumpRelativeIfZero"
 size = 0x18   # vram 0x8120BD60
 
 [[input.function_sizes]]
-name = "func_8120BD78"
+name = "GbCpu_JumpRelativeIfNotCarry"
 size = 0x18   # vram 0x8120BD78
 
 [[input.function_sizes]]
-name = "func_8120BD90"
+name = "GbCpu_JumpRelativeIfCarry"
 size = 0x18   # vram 0x8120BD90
 
 [[input.function_sizes]]
-name = "func_8120BDA8"
+name = "GbCpu_LoadAFromHlIncrement"
 size = 0x18   # vram 0x8120BDA8
 
 [[input.function_sizes]]
-name = "func_8120BDC0"
+name = "GbCpu_LoadAFromHlDecrement"
 size = 0x18   # vram 0x8120BDC0
 
 [[input.function_sizes]]
-name = "func_8120BDD8"
+name = "GbCpu_LoadAFromHl"
 size = 0x10   # vram 0x8120BDD8
 
 [[input.function_sizes]]
-name = "func_8120BDE8"
+name = "GbCpu_LoadBFromHl"
 size = 0x10   # vram 0x8120BDE8
 
 [[input.function_sizes]]
-name = "func_8120BDF8"
+name = "GbCpu_LoadCFromHl"
 size = 0x10   # vram 0x8120BDF8
 
 [[input.function_sizes]]
-name = "func_8120BE08"
+name = "GbCpu_LoadDFromHl"
 size = 0x10   # vram 0x8120BE08
 
 [[input.function_sizes]]
-name = "func_8120BE18"
+name = "GbCpu_LoadEFromHl"
 size = 0x10   # vram 0x8120BE18
 
 [[input.function_sizes]]
-name = "func_8120BE28"
+name = "GbCpu_LoadHFromHl"
 size = 0x18   # vram 0x8120BE28
 
 [[input.function_sizes]]
-name = "func_8120BE40"
+name = "GbCpu_LoadLFromHl"
 size = 0x14   # vram 0x8120BE40
 
 [[input.function_sizes]]
-name = "func_8120BE54"
+name = "GbCpu_AdcAFromHl"
 size = 0x84   # vram 0x8120BE54
 
 [[input.function_sizes]]
-name = "func_8120BED8"
+name = "GbCpu_AddAFromHl"
 size = 0x74   # vram 0x8120BED8
 
 [[input.function_sizes]]
-name = "func_8120BF4C"
+name = "GbCpu_AddSignedImmediateToSp"
 size = 0x54   # vram 0x8120BF4C
 
 [[input.function_sizes]]
-name = "func_8120BFA0"
+name = "GbCpu_AddHlBc"
 size = 0x58   # vram 0x8120BFA0
 
 [[input.function_sizes]]
-name = "func_8120BFF8"
+name = "GbCpu_SbcAccumulator"
 size = 0x88   # vram 0x8120BFF8
 
 [[input.function_sizes]]
-name = "func_8120C080"
+name = "GbCpu_SubtractAccumulator"
 size = 0x78   # vram 0x8120C080
 
 [[input.function_sizes]]
-name = "func_8120C0F8"
+name = "GbCpu_CompareAccumulator"
 size = 0x7C   # vram 0x8120C0F8
 
 [[input.function_sizes]]
-name = "func_8120C174"
+name = "GbCpu_LoadImmediateA"
 size = 0x10   # vram 0x8120C174
 
 [[input.function_sizes]]
-name = "func_8120C184"
+name = "GbCpu_LoadImmediateB"
 size = 0x10   # vram 0x8120C184
 
 [[input.function_sizes]]
-name = "func_8120C194"
+name = "GbCpu_LoadImmediateC"
 size = 0x10   # vram 0x8120C194
 
 [[input.function_sizes]]
-name = "func_8120C1A4"
+name = "GbCpu_LoadImmediateD"
 size = 0x10   # vram 0x8120C1A4
 
 [[input.function_sizes]]
-name = "func_8120C1B4"
+name = "GbCpu_LoadImmediateE"
 size = 0x10   # vram 0x8120C1B4
 
 [[input.function_sizes]]
-name = "func_8120C1C4"
+name = "GbCpu_LoadImmediateH"
 size = 0x14   # vram 0x8120C1C4
 
 [[input.function_sizes]]
-name = "func_8120C1D8"
+name = "GbCpu_LoadImmediateL"
 size = 0x10   # vram 0x8120C1D8
 
 [[input.function_sizes]]
-name = "func_8120C1E8"
+name = "GbCpu_StoreImmediateAtHl"
 size = 0x10   # vram 0x8120C1E8
 
 [[input.function_sizes]]
-name = "func_8120C1F8"
+name = "GbCpu_StoreAAtImmediateAddress"
 size = 0x10   # vram 0x8120C1F8
 
 [[input.function_sizes]]
-name = "func_8120C208"
+name = "GbCpu_StoreSpAtImmediateAddress"
 size = 0x28   # vram 0x8120C208
 
 [[input.function_sizes]]
@@ -912,11 +912,11 @@ name = "func_8120C230"
 size = 0x14   # vram 0x8120C230
 
 [[input.function_sizes]]
-name = "func_8120C244"
+name = "GbCpu_LoadAFromBc"
 size = 0x40   # vram 0x8120C244
 
 [[input.function_sizes]]
-name = "func_8120C284"
+name = "GbCpu_RotateAccumulatorLeft"
 size = 0x18   # vram 0x8120C284
 
 [[input.function_sizes]]
@@ -984,11 +984,11 @@ name = "func_8120C428"
 size = 0x24   # vram 0x8120C428
 
 [[input.function_sizes]]
-name = "func_8120C44C"
+name = "GbCpu_RotateAccumulatorLeftThroughCarry"
 size = 0x1C   # vram 0x8120C44C
 
 [[input.function_sizes]]
-name = "func_8120C468"
+name = "GbCpu_RotateAccumulatorRight"
 size = 0x1C   # vram 0x8120C468
 
 [[input.function_sizes]]
@@ -1024,7 +1024,7 @@ name = "func_8120C548"
 size = 0x24   # vram 0x8120C548
 
 [[input.function_sizes]]
-name = "func_8120C56C"
+name = "GbCpu_RotateAccumulatorRightThroughCarry"
 size = 0x14   # vram 0x8120C56C
 
 [[input.function_sizes]]
@@ -1880,23 +1880,23 @@ name = "func_8120CED4"
 size = 0x8   # vram 0x8120CED4
 
 [[input.function_sizes]]
-name = "func_8120CEDC"
+name = "GbCpu_SetCarryFlag"
 size = 0xC   # vram 0x8120CEDC
 
 [[input.function_sizes]]
-name = "func_8120CEE8"
+name = "GbCpu_ComplementCarryFlag"
 size = 0xC   # vram 0x8120CEE8
 
 [[input.function_sizes]]
-name = "func_8120CEF4"
+name = "GbCpu_DecimalAdjustAccumulator"
 size = 0x6C   # vram 0x8120CEF4
 
 [[input.function_sizes]]
-name = "func_8120CF60"
+name = "GbCpu_HandleSpeedSwitch"
 size = 0x84   # vram 0x8120CF60
 
 [[input.function_sizes]]
-name = "func_8120CFE4"
+name = "GbSgb_ExecuteCommand"
 size = 0x138   # vram 0x8120CFE4
 
 [[input.function_sizes]]
@@ -2922,55 +2922,52 @@ func = "Memmap_ClearFragmentMemmap"
 before_vram = 0x8000218C
 text = "pkmnstadium_memmap_clear_fragment(rdram, ctx->r4, ctx->r31);"
 
-# n_alLoadParam voice probe — fires just before the crashing load
-# `lw $t5, 0x8($v1)` at MIPS PC 0x8004FAE4. ctx->r2 = v0, ctx->r3 = v1
-# (post `lw $v1, 0xC($v0)` at 0x8004FAD8), ctx->r7 = a3. Records the
-# tuple in a 64-entry ring and prints to stderr the first time v1 is
-# OOB of RDRAM [0x80000000, 0x80800000) — that case would trip the
-# kids-club SIGSEGV. Without the probe we have no way to identify
-# which voice descriptor v0 came from.
+# GB Tower state trace — records emulator initialization, frame execution,
+# audio/video ticks, CPU dispatch, and selected state transitions in the
+# queryable diagnostic ring. Function names track the current disassembly;
+# before_vram values remain the exact guest instruction addresses.
 [[patches.hook]]
-func = "func_81206D9C"
+func = "GbEmu_Init"
 before_vram = 0x81206D9C
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81206D9C, (uint32_t)ctx->r4, ctx);"
 
 [[patches.hook]]
-func = "func_81206E64"
+func = "GbEmu_RunFrame"
 before_vram = 0x81206E64
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81206E64, 0, ctx);"
 
 [[patches.hook]]
-func = "func_81206E64"
+func = "GbEmu_RunFrame"
 before_vram = 0x81206E78
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81206E78, 0, ctx);"
 
 [[patches.hook]]
-func = "func_81206E64"
+func = "GbEmu_RunFrame"
 before_vram = 0x81206EC4
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81206EC4, 0, ctx);"
 
 [[patches.hook]]
-func = "func_81206E64"
+func = "GbEmu_RunFrame"
 before_vram = 0x81206EF8
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81206EF8, 0, ctx);"
 
 [[patches.hook]]
-func = "func_81206E64"
+func = "GbEmu_RunFrame"
 before_vram = 0x81206F08
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81206F08, 0, ctx);"
 
 [[patches.hook]]
-func = "func_81206E64"
+func = "GbEmu_RunFrame"
 before_vram = 0x81206F28
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81206F28, 0, ctx);"
 
 [[patches.hook]]
-func = "func_81206F38"
+func = "GbEmu_AudioVideoTick"
 before_vram = 0x81206F38
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81206F38, 0, ctx);"
 
 [[patches.hook]]
-func = "func_81206F38"
+func = "GbEmu_AudioVideoTick"
 before_vram = 0x81206F80
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81206F80, 0, ctx);"
 
@@ -3110,12 +3107,12 @@ before_vram = 0x81209078
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81209078, 0, ctx);"
 
 [[patches.hook]]
-func = "func_81209870"
+func = "GbEmu_InitContext"
 before_vram = 0x81209870
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81209870, (uint32_t)ctx->r4, ctx);"
 
 [[patches.hook]]
-func = "func_81209EB4"
+func = "GbCpu_Execute"
 before_vram = 0x81209FB4
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x81209FB4, (uint32_t)ctx->r28, ctx);"
 
@@ -3125,27 +3122,27 @@ before_vram = 0x8120B490
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x8120B490, (uint32_t)ctx->r28, ctx);"
 
 [[patches.hook]]
-func = "func_8120B4B8"
+func = "GbCpu_ResumeFromSavedState"
 before_vram = 0x8120B4B8
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x8120B4B8, (uint32_t)ctx->r28, ctx);"
 
 [[patches.hook]]
-func = "func_8120B4B8"
+func = "GbCpu_ResumeFromSavedState"
 before_vram = 0x8120B4D0
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x8120B4D0, (uint32_t)ctx->r28, ctx);"
 
 [[patches.hook]]
-func = "func_8120B4D8"
+func = "GbCpu_HandleReservedOpcode"
 before_vram = 0x8120B4D8
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x8120B4D8, (uint32_t)ctx->r28, ctx);"
 
 [[patches.hook]]
-func = "func_8120B4E4"
+func = "GbCpu_DisableInterrupts"
 before_vram = 0x8120B4E4
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x8120B4E4, (uint32_t)ctx->r28, ctx);"
 
 [[patches.hook]]
-func = "func_8120B4EC"
+func = "GbCpu_EnableInterrupts"
 before_vram = 0x8120B4EC
 text = "pkmnstadium_gbtower_state_trace(rdram, 0x8120B4EC, (uint32_t)ctx->r28, ctx);"
 
@@ -3311,12 +3308,12 @@ text = "pkmnstadium_mbp_exit(ctx->r2, ctx->r16);"
 # menu-load crash at func_86B0027C deref's a NULL returned by this
 # function; without these hooks we can't see what idx triggered it.
 [[patches.hook]]
-func = "func_80019D18"
+func = "Model_LoadByArchiveIndex"
 before_vram = 0x80019D18  # entry instr (addiu $sp,$sp,-0x30)
 text = "pkmnstadium_lookup_enter(ctx->r4);"
 
 [[patches.hook]]
-func = "func_80019D18"
+func = "Model_LoadByArchiveIndex"
 before_vram = 0x80019D84  # right after `lw $v0, 0x24($sp)` — v0 is set
 text = "pkmnstadium_lookup_exit(ctx->r2);"
 
@@ -3324,12 +3321,12 @@ text = "pkmnstadium_lookup_exit(ctx->r2);"
 # (rom_start, rom_end) → return value. Lets us see which entries
 # actually load valid data and which return 0.
 [[patches.hook]]
-func = "func_80003DC4"
+func = "Asset_LoadCompressed"
 before_vram = 0x80003DC4   # entry instr (addiu $sp,$sp,-0x38)
 text = "pkmnstadium_pers_enter(ctx->r4, ctx->r5);"
 
 [[patches.hook]]
-func = "func_80003DC4"
+func = "Asset_LoadCompressed"
 before_vram = 0x80003F4C   # right after `lw $v0, 0x2C($sp)` — v0 is set
 text = "pkmnstadium_pers_exit(rdram, ctx->r2);"
 
@@ -3371,7 +3368,7 @@ text = "pkmnstadium_copyprot_exit(ctx->r2);"
 # the just-loaded buttonPressed halfword. ctx->r17 ($s1) holds the
 # pointer to D_82100EC8 (set up at function start).
 [[patches.hook]]
-func = "func_821009B4"
+func = "Title_Loop"
 before_vram = 0x82100A1C
 text = "pkmnstadium_frag36_check((uint32_t)MEM_HU(ctx->r15, 0X8), MEM_W(ctx->r17, 0));"
 
@@ -3383,7 +3380,7 @@ text = "pkmnstadium_cri_enter(0);"
 
 # fragment36 exit hook — log the return value (= next gCurrentGameState)
 [[patches.hook]]
-func = "func_82100C98"
+func = "Title_Main"
 before_vram = 0x82100DAC   # right before jr — $v0 already loaded
 text = "pkmnstadium_frag36_exit(ctx->r2);"
 
@@ -3414,7 +3411,7 @@ text = "pkmnstadium_frag36_exit(ctx->r2);"
 #   ctx->r11 = $t3 = MEM_W($s0, 0x2C) = the suspect wave-table pointer
 #   ctx->r3  = $v1 = MEM_HU($s1, 0xC2) = the array index
 [[patches.hook]]
-func = "func_8003AD58"
+func = "Audio_DecodeVoiceCommandStream"
 before_vram = 0x8003AF60
 text = "pkmnstadium_audio_diag(rdram, (uint32_t)ctx->r16, (uint32_t)ctx->r17, (uint32_t)ctx->r11, (uint32_t)MEM_W(ctx->r16, 0X28), (uint16_t)ctx->r3);"
 
@@ -3464,7 +3461,7 @@ text = "pkmnstadium_segmap_clear_enter((uint32_t)ctx->r4, (uint32_t)MEM_W(0, (in
 # load (fragment75:96 ASSET_LOAD(D_6000000, copyright, 0)) is even
 # being attempted.
 [[patches.hook]]
-func = "func_80004258"
+func = "Asset_LoadToSegment"
 before_vram = 0x80004258   # entry — function start
 text = "pkmnstadium_asset_load_enter((uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint32_t)ctx->r6, (uint32_t)ctx->r7, (uint32_t)MEM_W(0, (int32_t)0x80075668));"
 
@@ -3473,22 +3470,22 @@ text = "pkmnstadium_asset_load_enter((uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint
 # see whether stadium_models is actually being loaded into the
 # allocation that fragment62's process_geo_layout reads from.
 [[patches.hook]]
-func = "func_800044F4"
+func = "BinArchive_Open"
 before_vram = 0x800044F4   # entry
 text = "pkmnstadium_load2_enter((uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint32_t)ctx->r6, (uint32_t)ctx->r7);"
 
 [[patches.hook]]
-func = "func_800044F4"
+func = "BinArchive_Open"
 before_vram = 0x80004658   # right before jr $ra
 text = "pkmnstadium_load2_exit((uint32_t)ctx->r2);"
 
 [[patches.hook]]
-func = "func_8000484C"
+func = "BinArchive_GetFile"
 before_vram = 0x8000484C   # entry
 text = "pkmnstadium_aload_enter(rdram, (uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint32_t)ctx->r31);"
 
 [[patches.hook]]
-func = "func_8000484C"
+func = "BinArchive_GetFile"
 before_vram = 0x80004954   # right before jr $ra
 text = "pkmnstadium_aload_exit((uint32_t)ctx->r2);"
 
@@ -3501,17 +3498,17 @@ text = "pkmnstadium_aload_exit((uint32_t)ctx->r2);"
 # capture in extras.c; reader tools/_arcload_ring.py; dump cmds
 # arcload_ring / arcload_badfrag. ctx->r31 = caller return address.
 [[patches.hook]]
-func = "func_800043BC"
+func = "Fragment_Register"
 before_vram = 0x800043BC   # entry — relocate-fragment dispatch
 text = "pkmnstadium_relocfrag_enter(rdram, (uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint32_t)ctx->r31);"
 
 [[patches.hook]]
-func = "func_800047C4"
+func = "BinArchive_LoadFileFromRom"
 before_vram = 0x800047C4   # entry
 text = "pkmnstadium_persload_enter((uint32_t)ctx->r4, (uint32_t)ctx->r5);"
 
 [[patches.hook]]
-func = "func_800047C4"
+func = "BinArchive_LoadFileFromRom"
 before_vram = 0x800047FC   # right before jr $ra
 text = "pkmnstadium_persload_exit((uint32_t)ctx->r2);"
 
@@ -3556,7 +3553,7 @@ text = "pkmnstadium_addr_translate_log(rdram, (uint32_t)ctx->r4, (uint32_t)ctx->
 # ctx->r4=arg0 (GraphNode*), ctx->r5=arg1 (seg-addr fn-ptr),
 # ctx->r6=arg2 (data void*).
 [[patches.hook]]
-func = "func_80010FDC"
+func = "GeoNode_SetCallback"
 before_vram = 0x80010FDC   # entry
 text = "pkmnstadium_geo_render_call_log((uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint32_t)ctx->r6);"
 
@@ -3588,7 +3585,7 @@ text = "pkmnstadium_mini_ekans_init_cam_enter(rdram);"
 # for the unk_D_800FC7D0_08C that the synth derefs at unk_2C.
 # Hook at function entry (0x8003C204).
 [[patches.hook]]
-func = "func_8003C204"
+func = "Audio_RelocatePointerArray"
 before_vram = 0x8003C204
 text = "pkmnstadium_resolver_log((uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint32_t)ctx->r6);"
 
@@ -3598,12 +3595,12 @@ text = "pkmnstadium_resolver_log((uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint32_t
 #   - sb_loader_args_log captures args (soundbank, wave_tables_offset)
 #     for the wave-bank corruption investigation
 [[patches.hook]]
-func = "func_8003BD2C"
+func = "Audio_RelocateSoundBank"
 before_vram = 0x8003BD2C
 text = "pkmnstadium_sb_loader_enter(rdram, (uint32_t)ctx->r4); pkmnstadium_sb_loader_args_log(rdram, (uint32_t)ctx->r4, (uint32_t)ctx->r5);"
 
 [[patches.hook]]
-func = "func_8003BD2C"
+func = "Audio_RelocateSoundBank"
 before_vram = 0x8003BEEC   # right before jr — TLS-stack pop gets correct soundbank
 text = "pkmnstadium_sb_loader_exit_log_tls(rdram);"
 
